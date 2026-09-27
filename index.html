@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>EVE Workshop · Monitoring</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#0b0f14">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+/* ============================================================
+   THEME TOKENS
+============================================================ */
+:root{
+  --bg:        #0b0f14;
+  --surface:   #131820;
+  --surface-2: #1a2029;
+  --line:      #232c38;
+  --line-2:    #2e3947;
+  --ink:       #dde3ea;
+  --ink-2:     #8792a0;
+  --ink-3:     #5b6675;
+
+  --brand:     #4ea8de;
+  --ok:        #4ade80;
+  --warn:      #fbbf24;
+  --bad:       #f87171;
+  --maint:     #a78bfa;
+  --idle:      #fb923c;
+
+  --r: #ef4444;
+  --s: #eab308;
+  --t: #06b6d4;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.3);
+  --radius: 6px;
+}
+[data-theme="light"]{
+  --bg:        #f4f6f9;
+  --surface:   #ffffff;
+  --surface-2: #f0f3f7;
+  --line:      #e2e7ee;
+  --line-2:    #cbd3dd;
+  --ink:       #1a2432;
+  --ink-2:     #5a6779;
+  --ink-3:     #8892a0;
+
+  --brand:     #1d7bc4;
+  --ok:        #16a34a;
+  --warn:      #d97706;
+  --bad:       #dc2626;
+  --shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);font-size:13px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  transition: background .2s, color .2s;
+}
+.mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+button{font-family:inherit;cursor:pointer;}
+
+/* ============================================================
+   LOGIN
+============================================================ */
+#loginView{
+  min-height:100vh;display:grid;place-items:center;padding:20px;
+  background:
+    linear-gradient(180deg,var(--bg) 0%, var(--bg) 100%);
+}
+.login-box{
+  width:100%;max-width:380px;background:var(--surface);
+  border:1px solid var(--line);border-radius:8px;
+  padding:32px 28px;box-shadow:var(--shadow);
+}
+.login-logo{
+  display:flex;align-items:center;gap:10px;margin-bottom:24px;
+}
+.login-logo .mark{
+  width:34px;height:34px;border-radius:6px;
+  background:var(--brand);color:white;font-weight:700;font-size:15px;
+  display:grid;place-items:center;letter-spacing:-.5px;
+}
+.login-logo h1{font-size:14px;font-weight:600;letter-spacing:.3px;}
+.login-logo p{font-size:11px;color:var(--ink-3);margin-top:1px;}
+
+.field{margin-bottom:14px;}
+.field label{
+  display:block;font-size:11px;color:var(--ink-2);
+  font-weight:500;margin-bottom:6px;
+}
+.field input{
+  width:100%;padding:10px 12px;background:var(--bg);
+  border:1px solid var(--line);border-radius:var(--radius);
+  color:var(--ink);font-size:13px;font-family:inherit;
+  transition:border .15s;
+}
+.field input:focus{outline:none;border-color:var(--brand);}
+.field input:disabled{opacity:.6;cursor:not-allowed;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 14px;font-size:12px;font-weight:500;
+  border-radius:var(--radius);border:1px solid var(--line-2);
+  background:var(--surface-2);color:var(--ink);
+  transition:all .12s;
+}
+.btn:hover{background:var(--surface);border-color:var(--ink-3);}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--brand);border-color:var(--brand);color:#fff;}
+.btn-primary:hover{background:#3d94c9;border-color:#3d94c9;}
+.btn-danger{background:transparent;border-color:var(--bad);color:var(--bad);}
+.btn-danger:hover{background:var(--bad);color:#fff;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-block{width:100%;}
+
+.error-msg{color:var(--bad);font-size:11px;margin-top:10px;min-height:14px;text-align:center;}
+.demo-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
+.hint-box{
+  margin-top:16px;padding:12px;background:var(--bg);
+  border:1px solid var(--line);border-radius:var(--radius);
+  font-size:11px;color:var(--ink-2);line-height:1.6;
+}
+
+/* ============================================================
+   APP SHELL
+============================================================ */
+.app{display:grid;grid-template-columns:210px 1fr;height:100vh;overflow:hidden;}
+
+/* Sidebar */
+.sidebar{
+  background:var(--surface);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.brand{
+  padding:16px 16px 14px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;
+}
+.brand .mark{
+  width:28px;height:28px;border-radius:5px;
+  background:var(--brand);color:#fff;
+  display:grid;place-items:center;font-weight:700;font-size:13px;
+}
+.brand .name{font-size:12px;font-weight:600;letter-spacing:.3px;}
+.brand .sub{font-size:10px;color:var(--ink-3);}
+
+.nav{flex:1;overflow-y:auto;padding:8px 0;}
+.nav-section{padding:10px 16px 4px;font-size:10px;font-weight:600;color:var(--ink-3);letter-spacing:.6px;text-transform:uppercase;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 16px;color:var(--ink-2);font-size:12px;
+  background:none;border:none;width:100%;text-align:left;
+  border-left:2px solid transparent;transition:all .12s;
+}
+.nav-item:hover{background:var(--surface-2);color:var(--ink);}
+.nav-item.active{color:var(--brand);border-left-color:var(--brand);background:var(--surface-2);}
+.nav-item .ico{width:16px;height:16px;flex-shrink:0;stroke-width:1.8;}
+.nav-item .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.nav-item .count{
+  margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;
+  background:var(--bad);color:#fff;font-weight:600;
+}
+
+.sidebar-bottom{
+  padding:10px 16px;border-top:1px solid var(--line);
+  font-size:11px;color:var(--ink-2);
+}
+.sidebar-bottom .user{margin-bottom:8px;line-height:1.4;}
+.sidebar-bottom .user b{color:var(--ink);font-weight:600;}
+
+/* Main */
+.main{display:flex;flex-direction:column;overflow:hidden;height:100vh;}
+.topbar{
+  height:52px;flex-shrink:0;
+  background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+}
+.topbar-title{font-size:13px;font-weight:600;letter-spacing:.2px;}
+.topbar-right{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--ink-2);}
+.topbar-right .icon-btn{
+  width:30px;height:30px;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--surface-2);
+  display:grid;place-items:center;color:var(--ink-2);
+}
+.topbar-right .icon-btn:hover{color:var(--ink);border-color:var(--line-2);}
+.topbar-right svg{width:14px;height:14px;}
+
+.status-live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;}
+.status-live .led{width:6px;height:6px;border-radius:50%;background:var(--ink-3);}
+.status-live.on .led{background:var(--ok);}
+.status-live.off .led{background:var(--bad);}
+
+.ticker{
+  background:var(--bg);border-bottom:1px solid var(--line);
+  font-size:11px;padding:7px 20px;
+  display:flex;gap:22px;overflow-x:auto;white-space:nowrap;flex-shrink:0;
+  scrollbar-width:none;
+}
+.ticker::-webkit-scrollbar{display:none;}
+.ticker .item{display:flex;align-items:center;gap:6px;color:var(--ink-2);}
+.ticker .item b{color:var(--ink);font-weight:500;}
+
+#view{flex:1;overflow-y:auto;overflow-x:hidden;}
+#view.no-scroll{overflow:hidden;}
+
+/* ============================================================
+   LAYOUT UTILS
+============================================================ */
+.page{padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
+
+/* Cards */
+.card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:14px;
+}
+.card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line);
+}
+.card-title{
+  font-size:11px;font-weight:600;color:var(--ink-2);
+  letter-spacing:.4px;text-transform:uppercase;
+}
+
+/* KPI */
+.kpi-label{font-size:10px;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;}
+.kpi-value{font-size:26px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-value.sm{font-size:20px;}
+.kpi-note{font-size:10px;color:var(--ink-3);margin-top:4px;}
+
+/* Status dot */
+.led{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.led.running{background:var(--ok);}
+.led.idle{background:var(--idle);}
+.led.error{background:var(--bad);}
+.led.maintenance{background:var(--maint);}
+.led.offline{background:var(--ink-3);}
+
+/* Area cards */
+.area-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:14px;cursor:pointer;
+  transition:border-color .15s,background .15s;
+  position:relative;
+}
+.area-card:hover{border-color:var(--line-2);background:var(--surface-2);}
+.area-card .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.area-card .head .name{font-size:13px;font-weight:600;}
+.area-card .head .count{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums;}
+.area-card .stats{display:flex;gap:14px;font-size:11px;color:var(--ink-2);}
+.area-card .stats .s{display:flex;align-items:center;gap:5px;}
+.area-card .accent-bar{
+  position:absolute;left:0;top:14px;bottom:14px;width:2px;border-radius:2px;
+}
+
+/* Machine cards */
+.machine-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));}
+.machine-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:12px;cursor:pointer;
+  transition:border-color .15s,background .15s;
+  position:relative;
+}
+.machine-card:hover{border-color:var(--line-2);background:var(--surface-2);}
+.machine-card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;}
+.machine-card .name{
+  font-size:12px;font-weight:600;display:flex;align-items:center;gap:7px;
+  min-width:0;
+}
+.machine-card .name span.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.machine-card .loc{font-size:10px;color:var(--ink-3);margin-top:2px;}
+.machine-card .tag{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--ink-3);padding:2px 6px;
+  background:var(--bg);border-radius:3px;flex-shrink:0;
+  border:1px solid var(--line);
+}
+.machine-card .foot{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:10px;padding-top:8px;border-top:1px solid var(--line);
+  font-size:10px;color:var(--ink-3);
+}
+
+/* Metrics in card */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.metrics.c3{grid-template-columns:repeat(3,1fr);}
+.metric{
+  background:var(--bg);border:1px solid var(--line);
+  border-radius:4px;padding:7px 9px;
+}
+.metric .l{font-size:9px;color:var(--ink-3);letter-spacing:.4px;text-transform:uppercase;}
+.metric .v{font-size:14px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;}
+.metric .v .unit{font-size:10px;color:var(--ink-3);font-weight:400;margin-left:2px;}
+
+/* 3-Phase widget */
+.phase-group{margin-top:8px;}
+.phase-group .lbl{
+  font-size:9px;color:var(--ink-3);letter-spacing:.5px;
+  text-transform:uppercase;margin-bottom:5px;
+}
+.phase-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.phase-box{
+  background:var(--bg);border:1px solid var(--line);
+  border-radius:4px;padding:6px 8px;position:relative;
+  border-left-width:2px;
+}
+.phase-box[data-p="R"]{border-left-color:var(--r);}
+.phase-box[data-p="S"]{border-left-color:var(--s);}
+.phase-box[data-p="T"]{border-left-color:var(--t);}
+.phase-box .p{font-size:9px;color:var(--ink-3);letter-spacing:.5px;}
+.phase-box .v{font-size:13px;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums;}
+
+/* kWh bar */
+.kwh-bar{
+  margin-top:8px;padding:7px 10px;background:var(--bg);
+  border:1px solid var(--line);border-radius:4px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.kwh-bar .l{font-size:9px;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase;}
+.kwh-bar .v{font-size:13px;font-weight:600;color:var(--warn);font-variant-numeric:tabular-nums;}
+
+/* Environment */
+.env-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.env-box{
+  background:var(--bg);border:1px solid var(--line);
+  border-radius:4px;padding:10px;text-align:center;
+}
+.env-box .icon{font-size:16px;margin-bottom:2px;}
+.env-box .l{font-size:9px;color:var(--ink-3);letter-spacing:.4px;text-transform:uppercase;}
+.env-box .v{font-size:18px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;}
+
+/* Alarm */
+.alarm{
+  display:flex;gap:10px;padding:9px 12px;
+  border-bottom:1px solid var(--line);font-size:11px;
+  align-items:flex-start;
+}
+.alarm:last-child{border-bottom:none;}
+.alarm .sev{
+  font-size:9px;font-weight:600;text-transform:uppercase;
+  padding:2px 6px;border-radius:3px;letter-spacing:.3px;flex-shrink:0;
+}
+.alarm[data-sev="critical"] .sev{background:rgba(248,113,113,.15);color:var(--bad);}
+.alarm[data-sev="warning"] .sev{background:rgba(251,191,36,.15);color:var(--warn);}
+.alarm[data-sev="info"] .sev{background:rgba(78,168,222,.15);color:var(--brand);}
+.alarm .body{flex:1;min-width:0;}
+.alarm .body .t{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.alarm .body .m{color:var(--ink-2);font-size:10px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.alarm .time{font-size:10px;color:var(--ink-3);flex-shrink:0;}
+
+/* Table */
+.table-wrap{overflow-x:auto;margin:-14px;padding:0 14px;}
+table.data{width:100%;border-collapse:collapse;font-size:12px;}
+table.data th{
+  text-align:left;padding:9px 10px;
+  font-size:10px;color:var(--ink-3);font-weight:600;
+  letter-spacing:.4px;text-transform:uppercase;
+  border-bottom:1px solid var(--line);white-space:nowrap;
+}
+table.data td{
+  padding:10px;border-bottom:1px solid var(--line);
+  font-variant-numeric:tabular-nums;vertical-align:middle;
+}
+table.data tr:hover td{background:var(--surface-2);}
+
+/* Chart */
+.chart-box{position:relative;height:220px;}
+.chart-box.sm{height:170px;}
+
+/* Phase toggle buttons */
+.phase-toggles{display:flex;gap:4px;}
+.phase-btn{
+  padding:4px 10px;font-size:11px;font-weight:500;
+  background:var(--bg);border:1px solid var(--line);
+  color:var(--ink-2);border-radius:4px;
+  transition:all .12s;
+}
+.phase-btn:hover{color:var(--ink);border-color:var(--line-2);}
+.phase-btn.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+.phase-btn[data-p="R"].active{background:var(--r);border-color:var(--r);color:#fff;}
+.phase-btn[data-p="S"].active{background:var(--s);border-color:var(--s);color:#111;}
+.phase-btn[data-p="T"].active{background:var(--t);border-color:var(--t);color:#fff;}
+
+/* Modal */
+.modal-back{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  display:grid;place-items:center;z-index:100;padding:16px;
+  backdrop-filter:blur(2px);
+}
+.modal{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:8px;width:100%;max-width:480px;
+  max-height:90vh;overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 20px 50px rgba(0,0,0,.4);
+}
+.modal-head{
+  padding:14px 18px;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-head h3{font-size:13px;font-weight:600;}
+.modal-body{padding:18px;overflow-y:auto;}
+.modal-foot{
+  padding:12px 18px;border-top:1px solid var(--line);
+  display:flex;justify-content:flex-end;gap:8px;
+}
+
+/* Empty */
+.empty{
+  padding:32px 20px;text-align:center;color:var(--ink-3);font-size:12px;
+}
+.empty .icon{font-size:24px;margin-bottom:8px;opacity:.4;}
+
+/* Text colors */
+.t-ok{color:var(--ok);}
+.t-warn{color:var(--warn);}
+.t-bad{color:var(--bad);}
+.t-brand{color:var(--brand);}
+.t-muted{color:var(--ink-3);}
+.t-dim{color:var(--ink-2);}
+
+/* Scroll */
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:var(--ink-3);}
+
+/* ============================================================
+   MOBILE
+============================================================ */
+.mobile-only{display:none;}
+
+@media (max-width: 900px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{
+    position:fixed;bottom:0;left:0;right:0;
+    width:100%;height:auto;border-right:none;
+    border-top:1px solid var(--line);
+    flex-direction:row;z-index:50;
+    padding-bottom:env(safe-area-inset-bottom,0);
+  }
+  .sidebar .brand, .sidebar .nav-section, .sidebar-bottom{display:none;}
+  .nav{
+    display:flex;flex-direction:row;justify-content:space-around;
+    padding:6px 4px;width:100%;overflow-x:auto;scrollbar-width:none;
+  }
+  .nav::-webkit-scrollbar{display:none;}
+  .nav-item{
+    flex-direction:column;gap:3px;padding:6px 8px;
+    border-left:none;border-bottom:2px solid transparent;
+    font-size:10px;min-width:64px;text-align:center;
+    border-radius:4px;
+  }
+  .nav-item.active{
+    border-left:none;border-bottom-color:var(--brand);
+    background:transparent;
+  }
+  .nav-item .ico{width:18px;height:18px;}
+  .nav-item .count{display:none;}
+
+  .main{padding-bottom:64px;height:100vh;}
+  .topbar{padding:0 14px;height:48px;}
+  .topbar-title{font-size:12px;}
+  .topbar-right{gap:10px;font-size:10px;}
+  .topbar-right .icon-btn{width:28px;height:28px;}
+  .ticker{padding:6px 14px;gap:16px;font-size:10px;}
+
+  .page{padding:12px 14px;gap:10px;}
+
+  .grid-4, .grid-3, .grid-2, .grid-2-1{grid-template-columns:1fr;gap:10px;}
+
+  .kpi-value{font-size:22px;}
+  .kpi-value.sm{font-size:18px;}
+
+  .machine-grid{grid-template-columns:1fr;}
+
+  .chart-box{height:200px;}
+  .chart-box.sm{height:160px;}
+
+  /* Mobile: compact KPI row 2-col */
+  .grid-4.mobile-2col{grid-template-columns:1fr 1fr;}
+  .grid-4.mobile-2col .card{padding:11px;}
+  .grid-4.mobile-2col .kpi-value{font-size:20px;}
+
+  /* Mobile: area card compact */
+  .area-card{padding:12px;}
+  .area-card .head .name{font-size:12px;}
+
+  .phase-btn{padding:4px 8px;font-size:10px;}
+
+  /* Table font smaller */
+  table.data{font-size:11px;}
+  table.data th{padding:8px;}
+  table.data td{padding:8px;}
+}
+
+@media (max-width: 380px){
+  .kpi-value{font-size:20px;}
+  .grid-4.mobile-2col .kpi-value{font-size:18px;}
+  .metric .v{font-size:13px;}
+}
+
+/* Print */
+@media print{
+  .sidebar, .topbar, .ticker{display:none !important;}
+  .main{padding-bottom:0 !important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN
+============================================================ -->
+<div id="loginView">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="mark">E</div>
+      <div>
+        <h1>EVE Workshop</h1>
+        <p>Industrial Monitoring</p>
+      </div>
+    </div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label>Username</label>
+        <input class="mono" name="username" value="admin" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input class="mono" name="password" type="password" value="admin123" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-block" type="submit" style="margin-top:6px;padding:11px;">Sign In</button>
+      <p class="error-msg" id="loginErr"></p>
+    </form>
+
+    <div class="demo-row">
+      <button class="btn" data-demo="admin">Demo Admin</button>
+      <button class="btn" data-demo="viewer">Demo Viewer</button>
+    </div>
+
+    <div class="hint-box">
+      <strong style="color:var(--ink);display:block;margin-bottom:4px;">Akses:</strong>
+      Admin — kelola equipment, settings, export<br>
+      Viewer — hanya melihat dashboard
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APP
+============================================================ -->
+<div id="app" class="app" style="display:none;">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">E</div>
+      <div>
+        <div class="name">EVE Workshop</div>
+        <div class="sub">Monitoring</div>
+      </div>
+    </div>
+    <nav class="nav" id="navList">
+      <button class="nav-item" data-route="dashboard">
+        <svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+        <span>Overview</span>
+      </button>
+      <button class="nav-item" data-route="alarms">
+        <svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
+        <span>Alarms</span>
+        <span class="count" id="navAlarmCount" style="display:none;">0</span>
+      </button>
+
+      <div class="nav-section">Areas</div>
+      <button class="nav-item" data-route="area" data-area="Machining">
+        <span class="dot" style="background:var(--brand);"></span>
+        <span>Machining</span>
+      </button>
+      <button class="nav-item" data-route="area" data-area="Welding">
+        <span class="dot" style="background:var(--idle);"></span>
+        <span>Welding</span>
+      </button>
+      <button class="nav-item" data-route="area" data-area="Power">
+        <span class="dot" style="background:var(--warn);"></span>
+        <span>Power</span>
+      </button>
+      <button class="nav-item" data-route="area" data-area="Facility">
+        <span class="dot" style="background:var(--ok);"></span>
+        <span>Facility</span>
+      </button>
+
+      <div class="nav-section">System</div>
+      <button class="nav-item" data-route="reports">
+        <svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>
+        <span>Reports</span>
+      </button>
+      <button class="nav-item" data-route="settings">
+        <svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.7 1.7 0 008.9 19a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1A1.7 1.7 0 004.6 8.9a1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+        <span>Settings</span>
+      </button>
+      <button class="nav-item" data-route="admin" id="navAdmin">
+        <svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Equipment</span>
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user" id="userInfo"></div>
+      <button class="btn btn-sm btn-block" onclick="App.logout()">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title" id="pageTitle">Overview</div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="Theme.toggle()" title="Toggle theme">
+          <svg id="themeIcon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <span class="status-live" id="liveIndicator">
+          <span class="led"></span> <span>Connecting</span>
+        </span>
+        <span class="mono" id="clock" style="font-size:11px;">—</span>
+      </div>
+    </header>
+
+    <div class="ticker">
+      <div class="item">OEE <b class="mono" id="tkOee">—</b></div>
+      <div class="item">Alarms <b class="mono t-bad" id="tkAlarms">0</b></div>
+      <div class="item">Running <b class="mono t-ok" id="tkRunning">0</b></div>
+      <div class="item">Assets <b class="mono" id="tkAssets">0</b></div>
+      <div class="item">Mode <b class="mono" id="tkMode">LIVE</b></div>
+    </div>
+
+    <div id="view"></div>
+  </main>
+</div>
+
+<div id="modalRoot"></div>
+
+<script>
+/* ============================================================
+   CONFIG
+============================================================ */
+const CONFIG = {
+  API_BASE: (location.origin.startsWith('http') && location.port !== '8080'
+              ? location.origin : 'http://localhost:3000') + '/api/v1',
+  SOCKET_URL: (location.origin.startsWith('http') && location.port !== '8080'
+              ? location.origin : 'http://localhost:3000'),
+  DEMO_MODE: false
+};
+
+/* ============================================================
+   THEME
+============================================================ */
+const Theme = {
+  init(){
+    const saved = localStorage.getItem('eve_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    this.updateIcon();
+  },
+  toggle(){
+    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('eve_theme', next);
+    this.updateIcon();
+    if (State.currentRoute === 'dashboard') DashboardPage.render();
+    else if (State.currentRoute === 'machine' && DetailPage.machineId) DetailPage.render(DetailPage.machineId);
+  },
+  updateIcon(){
+    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    const icon = document.getElementById('themeIcon');
+    if (!icon) return;
+    if (cur === 'dark'){
+      icon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+    } else {
+      icon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
+    }
+  },
+  grid(){ return document.documentElement.getAttribute('data-theme') === 'light' ? '#e5e9f0' : '#1c2530'; },
+  text(){ return document.documentElement.getAttribute('data-theme') === 'light' ? '#5a6779' : '#8792a0'; }
+};
+
+/* ============================================================
+   AUTH
+============================================================ */
+const Auth = {
+  get token(){ return localStorage.getItem('eve_token'); },
+  get user(){ try{ return JSON.parse(localStorage.getItem('eve_user')); }catch{ return null; } },
+  set(t,u){ localStorage.setItem('eve_token',t); localStorage.setItem('eve_user',JSON.stringify(u)); },
+  clear(){ localStorage.removeItem('eve_token'); localStorage.removeItem('eve_user'); },
+  isAdmin(){ return this.user?.role === 'admin'; },
+  canOperate(){ return ['admin','operator','engineer'].includes(this.user?.role); }
+};
+
+/* ============================================================
+   SETTINGS
+============================================================ */
+const Settings = {
+  defaults: { tempWarning:75, tempCritical:90, vibrationWarning:4.5, vibrationCritical:7, voltageMin:200, humidityWarning:70, shiftStart:'08:00', shiftEnd:'16:00' },
+  get(){ try { const s = localStorage.getItem('eve_settings'); return s ? {...this.defaults, ...JSON.parse(s)} : {...this.defaults}; } catch { return {...this.defaults}; } },
+  save(o){ localStorage.setItem('eve_settings', JSON.stringify(o)); },
+  reset(){ localStorage.removeItem('eve_settings'); }
+};
+
+/* ============================================================
+   STATE
+============================================================ */
+const State = {
+  machines: [], live: {}, alarms: [], oee: [],
+  currentRoute: 'dashboard', currentArea: null,
+  socket: null, clockTimer: null
+};
+
+/* ============================================================
+   HELPERS
+============================================================ */
+const fmtN = (v,d=1)=>{ if(v===null||v===undefined||isNaN(v)) return '—'; return Number(v).toFixed(d); };
+const fmtT = ts => new Date(ts).toLocaleTimeString('id-ID',{hour12:false});
+const fmtD = ts => new Date(ts).toLocaleString('id-ID',{hour12:false});
+const ago = ts => {
+  const s = Math.floor((Date.now()-new Date(ts))/1000);
+  if(s<60) return s+'s'; if(s<3600) return Math.floor(s/60)+'m';
+  if(s<86400) return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d';
+};
+const statusCls = s => ({running:'t-ok',idle:'t-warn',error:'t-bad',maintenance:'t-brand',offline:'t-muted'}[s] || 't-muted');
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const beep = ()=>{ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.frequency.value=880; o.connect(g); g.connect(ctx.destination); g.gain.setValueAtTime(.08,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.3); o.start(); o.stop(ctx.currentTime+.3); }catch{} };
+const dl = (c,f,m)=>{ const b=new Blob([c],{type:m}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=f; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); };
+
+/* ============================================================
+   API
+============================================================ */
+async function api(path, opts={}){
+  if (CONFIG.DEMO_MODE) return DemoAPI.handle(path, opts);
+  const res = await fetch(`${CONFIG.API_BASE}${path}`, {
+    ...opts,
+    headers:{ 'Content-Type':'application/json', ...(Auth.token?{Authorization:`Bearer ${Auth.token}`}:{}), ...(opts.headers||{}) }
+  });
+  if (res.status === 401){ Auth.clear(); App.showLogin(); throw new Error('unauth'); }
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  return res.json();
+}
+
+/* ============================================================
+   AREA MAP
+============================================================ */
+const AREA_MAP = {
+  Machining: { title:'Machining', sub:'Lathe · Milling · Drilling', sections:[
+    { name:'Lathe',     filter:m=>m.type==='Lathe' },
+    { name:'Milling',   filter:m=>m.type==='Milling' },
+    { name:'Drilling',  filter:m=>m.type==='Drilling' }
+  ]},
+  Welding: { title:'Welding', sub:'Arc Welding Stations', sections:[
+    { name:'Welding Machines', filter:m=>m.type==='Welding' }
+  ]},
+  Power: { title:'Power', sub:'Distribution Panels', sections:[
+    { name:'Electrical Panels', filter:m=>m.type==='Panel' }
+  ]},
+  Facility: { title:'Facility', sub:'Room Environment', sections:[
+    { name:'Environment Sensors', filter:m=>m.type==='Environment' }
+  ]}
+};
+
+/* ============================================================
+   APP
+============================================================ */
+const App = {
+  init(){
+    Theme.init();
+    this.clock();
+    this.bindLogin();
+    this.bindNav();
+    window.addEventListener('hashchange', ()=>this.route());
+
+    if (Auth.token){
+      if (Auth.token.startsWith('demo-')) CONFIG.DEMO_MODE = true;
+      this.showApp();
+    } else {
+      this.showLogin();
+    }
+  },
+
+  clock(){
+    const t = ()=>{ const e = document.getElementById('clock'); if(e) e.textContent = new Date().toLocaleString('id-ID',{hour12:false}); };
+    t();
+    if (State.clockTimer) clearInterval(State.clockTimer);
+    State.clockTimer = setInterval(t, 1000);
+  },
+
+  bindLogin(){
+    document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const err = document.getElementById('loginErr');
+      err.style.color = 'var(--ink-2)';
+      err.textContent = 'Menghubungi server...';
+      const fd = new FormData(e.target);
+      const ctrl = new AbortController();
+      const tid = setTimeout(()=>ctrl.abort(), 5000);
+      try {
+        const res = await fetch(`${CONFIG.API_BASE}/auth/login`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') }),
+          signal: ctrl.signal
+        });
+        clearTimeout(tid);
+        if (!res.ok) throw new Error(`Gagal (${res.status})`);
+        const { token, user } = await res.json();
+        Auth.set(token, user);
+        err.textContent = '';
+        this.showApp();
+      } catch (ex){
+        clearTimeout(tid);
+        err.style.color = 'var(--bad)';
+        err.textContent = ex.name === 'AbortError' ? 'Server tidak merespons. Pakai tombol Demo.' : `⚠ ${ex.message} — pakai tombol Demo.`;
+      }
+    });
+
+    document.querySelectorAll('[data-demo]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const role = b.dataset.demo;
+        CONFIG.DEMO_MODE = true;
+        Auth.set('demo-'+role, {
+          id: role==='admin'?1:2, username:role,
+          name: role==='admin'?'Administrator':'Viewer',
+          role: role
+        });
+        this.showApp();
+      });
+    });
+  },
+
+  bindNav(){
+    document.querySelectorAll('[data-route]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const route = b.dataset.route;
+        const area = b.dataset.area;
+        location.hash = (route === 'area' && area) ? `area/${area}` : route;
+      });
+    });
+  },
+
+  logout(){
+    Auth.clear();
+    if (State.socket){ try{State.socket.disconnect();}catch{} State.socket = null; }
+    CONFIG.DEMO_MODE = false;
+    DemoAPI.simulated = false;
+    location.hash = '';
+    this.showLogin();
+  },
+
+  showLogin(){
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('loginView').style.display = 'grid';
+    this.clock();
+  },
+
+  async showApp(){
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('app').style.display = 'grid';
+
+    const u = Auth.user;
+    document.getElementById('userInfo').innerHTML = `<b>${esc(u?.name || u?.username)}</b><br><span class="t-muted">${(u?.role||'').toUpperCase()}</span>`;
+    document.getElementById('tkMode').textContent = CONFIG.DEMO_MODE ? 'DEMO' : 'LIVE';
+
+    if (!Auth.isAdmin()) document.getElementById('navAdmin').style.display = 'none';
+
+    if (CONFIG.DEMO_MODE) DemoAPI.init();
+    if (!location.hash) location.hash = '#dashboard';
+
+    await this.loadAll();
+    this.route();
+    this.realtime();
+    setInterval(()=>this.loadAlarms(), 15000);
+    setInterval(()=>this.loadOee(), 30000);
+  },
+
+  async loadAll(){
+    try {
+      State.machines = await api('/machines');
+      const st = await api('/telemetry/status/all');
+      State.live = {};
+      st.forEach(r=>{
+        State.live[r.machine_id] = State.live[r.machine_id] || {};
+        State.live[r.machine_id][r.metric] = r.text_value ?? r.value;
+        State.live[r.machine_id].lastSeen = r.time;
+      });
+      await this.loadAlarms();
+      await this.loadOee();
+      document.getElementById('tkAssets').textContent = State.machines.length;
+      this.navBadge();
+      this.ticker();
+    } catch(e){ console.error(e); }
+  },
+
+  async loadAlarms(){
+    try {
+      State.alarms = await api('/alarms?status=active&limit=50');
+      this.navBadge(); this.ticker();
+    } catch(e){}
+  },
+
+  async loadOee(){
+    try {
+      State.oee = await api('/oee/summary/plant');
+      const avg = State.oee.length ? State.oee.reduce((s,r)=>s+(+r.oee||0),0)/State.oee.length : 0;
+      document.getElementById('tkOee').textContent = avg.toFixed(1)+'%';
+    } catch(e){}
+  },
+
+  ticker(){
+    document.getElementById('tkAlarms').textContent = State.alarms.length;
+    const r = State.machines.filter(m=>State.live[m.id]?.status==='running').length;
+    document.getElementById('tkRunning').textContent = r;
+  },
+
+  navBadge(){
+    const el = document.getElementById('navAlarmCount');
+    if (State.alarms.length){ el.textContent = State.alarms.length; el.style.display='inline-block'; }
+    else el.style.display='none';
+  },
+
+  realtime(){
+    if (CONFIG.DEMO_MODE){ DemoAPI.startSimulator(); this.setLive(true); return; }
+    if (State.socket) return;
+    try {
+      State.socket = io(CONFIG.SOCKET_URL, { auth:{token:Auth.token}, transports:['websocket'] });
+      State.socket.on('connect', ()=>this.setLive(true));
+      State.socket.on('disconnect', ()=>this.setLive(false));
+      State.socket.on('connect_error', ()=>this.setLive(false));
+      State.socket.on('telemetry', d=>{
+        State.live[d.machineId] = State.live[d.machineId] || {};
+        State.live[d.machineId][d.metric] = d.textValue ?? d.value;
+        State.live[d.machineId].lastSeen = d.time || new Date().toISOString();
+        this.onTele(d);
+      });
+      State.socket.on('alarm', a=>this.onAlarm(a));
+    } catch(e){}
+  },
+
+  setLive(ok){
+    const el = document.getElementById('liveIndicator');
+    if (!el) return;
+    el.className = 'status-live ' + (ok ? 'on' : 'off');
+    el.querySelector('span:last-child').textContent = ok ? 'Live' : 'Offline';
+  },
+
+  onTele(d){
+    const card = document.querySelector(`.machine-card[data-id="${d.machineId}"]`);
+    if (card){
+      const s = State.live[d.machineId].status || 'offline';
+      const led = card.querySelector('.led');
+      if (led) led.className = 'led ' + s;
+      const el = card.querySelector(`[data-m="${d.metric}"]`);
+      if (el){
+        const dec = d.metric==='vibration' ? 2 : (['voltage','humidity','power_kwh'].includes(d.metric) ? 0 : 1);
+        const unit = el.querySelector('.unit');
+        if (unit) el.innerHTML = fmtN(d.value, dec) + `<span class="unit">${unit.textContent}</span>`;
+        else el.textContent = fmtN(d.value, dec);
+      }
+      // phase boxes
+      const ph = card.querySelector(`[data-ph="${d.metric}"]`);
+      if (ph) ph.textContent = fmtN(d.value, d.metric.startsWith('voltage')?0:1);
+    }
+    if (d.metric === 'status'){
+      const r = State.machines.filter(m=>State.live[m.id]?.status==='running').length;
+      document.getElementById('tkRunning').textContent = r;
+      if (State.currentRoute === 'dashboard') DashboardPage.updateKpi();
+    }
+    if (window.DetailPage && DetailPage.machineId === d.machineId) DetailPage.onTele(d);
+  },
+
+  onAlarm(a){
+    State.alarms.unshift({ ...a, machine_name: State.machines.find(m=>m.id===a.machine_id)?.name || a.machine_id });
+    State.alarms = State.alarms.slice(0,50);
+    this.navBadge(); this.ticker();
+    if (State.currentRoute === 'alarms') AlarmsPage.render();
+    if (State.currentRoute === 'dashboard') DashboardPage.render();
+    if (a.severity === 'critical') beep();
+  },
+
+  route(){
+    const raw = (location.hash.replace('#','') || 'dashboard').split('/');
+    const route = raw[0]; const param = raw[1];
+    const v = document.getElementById('view');
+    v.classList.remove('no-scroll');
+
+    document.querySelectorAll('.nav-item').forEach(n=>{
+      const nr = n.dataset.route, na = n.dataset.area;
+      let active = false;
+      if (route === 'area' && nr === 'area') active = (na === param);
+      else if (route !== 'area' && nr === route) active = true;
+      n.classList.toggle('active', active);
+    });
+
+    const title = { dashboard:'Overview', alarms:'Alarm Center', reports:'Reports', settings:'Settings', admin:'Equipment', area:'Area', machine:'Machine Detail' }[route] || 'Overview';
+    document.getElementById('pageTitle').textContent = title;
+
+    if (route === 'area') { State.currentRoute = 'area'; AreaPage.render(param); }
+    else if (route === 'machine') { State.currentRoute = 'machine'; DetailPage.render(param); }
+    else if (route === 'alarms') { State.currentRoute = 'alarms'; AlarmsPage.render(); }
+    else if (route === 'reports') { State.currentRoute = 'reports'; ReportsPage.render(); }
+    else if (route === 'settings') { State.currentRoute = 'settings'; SettingsPage.render(); }
+    else if (route === 'admin') {
+      if (!Auth.isAdmin()){ location.hash = 'dashboard'; return; }
+      State.currentRoute = 'admin'; AdminPage.render();
+    }
+    else { State.currentRoute = 'dashboard'; v.classList.add('no-scroll'); DashboardPage.render(); }
+  },
+
+  goMachine(id){ location.hash = `machine/${id}`; },
+  goArea(a){ location.hash = `area/${a}`; }
+};
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
+const DashboardPage = {
+  oeeChart: null,
+  render(){
+    const c = document.getElementById('view');
+    const total = State.machines.length;
+    const run = State.machines.filter(m=>State.live[m.id]?.status==='running').length;
+    const idle = State.machines.filter(m=>State.live[m.id]?.status==='idle').length;
+    const err = State.machines.filter(m=>State.live[m.id]?.status==='error').length;
+
+    c.innerHTML = `
+      <div class="page" style="height:calc(100vh - 100px);gap:12px;">
+        <div class="grid-4 mobile-2col">
+          <div class="card"><div class="kpi-label">Assets</div><div class="kpi-value" id="kTotal">${total}</div><div class="kpi-note">Total registered</div></div>
+          <div class="card"><div class="kpi-label">Running</div><div class="kpi-value t-ok" id="kRun">${run}</div><div class="kpi-note">${total?Math.round(run/total*100):0}% online</div></div>
+          <div class="card"><div class="kpi-label">Idle</div><div class="kpi-value t-warn" id="kIdle">${idle}</div><div class="kpi-note">Standby</div></div>
+          <div class="card"><div class="kpi-label">Fault</div><div class="kpi-value t-bad" id="kErr">${err}</div><div class="kpi-note">Needs attention</div></div>
+        </div>
+
+        <div class="grid-4" id="areaCards" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));"></div>
+
+        <div class="grid-2-1" style="flex:1;min-height:0;">
+          <div class="card" style="display:flex;flex-direction:column;overflow:hidden;">
+            <div class="card-head" style="flex-shrink:0;">
+              <div class="card-title">OEE · Equipment Ranking</div>
+              <div class="t-muted mono" style="font-size:10px;">Availability × Performance × Quality</div>
+            </div>
+            <div style="flex:1;position:relative;min-height:0;"><canvas id="oeeChart"></canvas></div>
+          </div>
+          <div class="card" style="display:flex;flex-direction:column;overflow:hidden;">
+            <div class="card-head" style="flex-shrink:0;">
+              <div class="card-title">Active Alarms</div>
+              <span class="mono t-bad" id="alarmBadge" style="font-size:12px;">${State.alarms.length}</span>
+            </div>
+            <div style="flex:1;overflow-y:auto;margin:-14px;">
+              <div id="alarmList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    this.renderAreas();
+    this.renderAlarms();
+    this.renderOee();
+  },
+
+  updateKpi(){
+    const $ = id=>document.getElementById(id);
+    if (!$('kRun')) return;
+    const total = State.machines.length;
+    const run = State.machines.filter(m=>State.live[m.id]?.status==='running').length;
+    const idle = State.machines.filter(m=>State.live[m.id]?.status==='idle').length;
+    const err = State.machines.filter(m=>State.live[m.id]?.status==='error').length;
+    $('kTotal').textContent = total;
+    $('kRun').textContent = run;
+    $('kIdle').textContent = idle;
+    $('kErr').textContent = err;
+  },
+
+  renderAreas(){
+    const container = document.getElementById('areaCards');
+    if (!container) return;
+    container.innerHTML = '';
+    const colorMap = { Machining:'var(--brand)', Welding:'var(--idle)', Power:'var(--warn)', Facility:'var(--ok)' };
+
+    Object.entries(AREA_MAP).forEach(([key, area])=>{
+      const list = State.machines.filter(m => m.metadata?.area === key);
+      const run = list.filter(m=>State.live[m.id]?.status==='running').length;
+      const idle = list.filter(m=>State.live[m.id]?.status==='idle').length;
+      const err = list.filter(m=>State.live[m.id]?.status==='error').length;
+
+      const card = document.createElement('div');
+      card.className = 'area-card';
+      card.innerHTML = `
+        <div class="accent-bar" style="background:${colorMap[key]};"></div>
+        <div class="head">
+          <div class="name">${area.title}</div>
+          <div class="count">${list.length} assets</div>
+        </div>
+        <div class="stats">
+          <div class="s"><span class="led running"></span> ${run}</div>
+          <div class="s"><span class="led idle"></span> ${idle}</div>
+          <div class="s"><span class="led error"></span> ${err}</div>
+        </div>
+      `;
+      card.onclick = ()=> App.goArea(key);
+      container.appendChild(card);
+    });
+  },
+
+  renderAlarms(){
+    const el = document.getElementById('alarmList');
+    if (!el) return;
+    if (!State.alarms.length){
+      el.innerHTML = `<div class="empty"><div class="icon">✓</div>No active alarms</div>`;
+      return;
+    }
+    el.innerHTML = State.alarms.map(a=>`
+      <div class="alarm" data-sev="${a.severity}">
+        <span class="sev">${a.severity}</span>
+        <div class="body">
+          <div class="t">${esc(a.machine_name||a.machine_id)}</div>
+          <div class="m">${esc(a.message)}</div>
+        </div>
+        <div class="time">${ago(a.raised_at)}</div>
+      </div>
+    `).join('');
+  },
+
+  renderOee(){
+    const ctx = document.getElementById('oeeChart');
+    if (!ctx) return;
+    if (this.oeeChart) this.oeeChart.destroy();
+    this.oeeChart = new Chart(ctx.getContext('2d'), {
+      type:'bar',
+      data:{
+        labels: State.oee.map(r=>r.machine_id),
+        datasets:[{
+          label:'OEE',
+          data: State.oee.map(r=>+r.oee||0),
+          backgroundColor: State.oee.map(r=> +r.oee>=85 ? '#4ade80' : +r.oee>=60 ? '#fbbf24' : '#f87171'),
+          borderRadius:3
+        }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 } },
+        scales:{
+          x:{ grid:{color:Theme.grid()}, ticks:{color:Theme.text(),font:{size:10}} },
+          y:{ beginAtZero:true, max:100, grid:{color:Theme.grid()}, ticks:{color:Theme.text(),font:{size:10},callback:v=>v+'%'} }
+        }
+      }
+    });
+  }
+};
+
+/* ============================================================
+   AREA PAGE
+============================================================ */
+const AreaPage = {
+  render(areaKey){
+    const area = AREA_MAP[areaKey];
+    const c = document.getElementById('view');
+    if (!area){ c.innerHTML = `<div class="page"><div class="card">Area tidak ditemukan</div></div>`; return; }
+    const list = State.machines.filter(m => m.metadata?.area === areaKey);
+
+    const run = list.filter(m=>State.live[m.id]?.status==='running').length;
+    const idle = list.filter(m=>State.live[m.id]?.status==='idle').length;
+    const err = list.filter(m=>['error','offline'].includes(State.live[m.id]?.status)).length;
+
+    c.innerHTML = `
+      <div class="page">
+        <div class="grid-4 mobile-2col">
+          <div class="card"><div class="kpi-label">Total</div><div class="kpi-value">${list.length}</div></div>
+          <div class="card"><div class="kpi-label">Running</div><div class="kpi-value t-ok">${run}</div></div>
+          <div class="card"><div class="kpi-label">Idle</div><div class="kpi-value t-warn">${idle}</div></div>
+          <div class="card"><div class="kpi-label">Fault</div><div class="kpi-value t-bad">${err}</div></div>
+        </div>
+        <div id="sections"></div>
+      </div>
+    `;
+
+    const container = document.getElementById('sections');
+    area.sections.forEach(section=>{
+      const items = list.filter(section.filter);
+      if (!items.length) return;
+      const sec = document.createElement('div');
+      sec.style.marginBottom = '18px';
+      sec.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+          <div class="card-title">${section.name}</div>
+          <span class="mono t-muted" style="font-size:10px;">${items.length} units</span>
+        </div>
+        <div class="machine-grid"></div>
+      `;
+      container.appendChild(sec);
+      const grid = sec.querySelector('.machine-grid');
+      items.forEach(m=>grid.appendChild(this.card(m)));
+    });
+
+    if (!list.length) container.innerHTML = `<div class="card"><div class="empty">No equipment registered in this area</div></div>`;
+  },
+
+  card(m){
+    const live = State.live[m.id] || {};
+    const status = live.status || 'offline';
+    const card = document.createElement('div');
+    card.className = 'machine-card';
+    card.dataset.id = m.id;
+    const meta = m.metadata || {};
+    const sub = meta.section || meta.subtype || meta.room || m.type;
+
+    let body = '';
+    if (m.type === 'Panel'){
+      body = `
+        <div class="phase-group">
+          <div class="lbl">Voltage (V)</div>
+          <div class="phase-row">
+            <div class="phase-box" data-p="R"><div class="p">R</div><div class="v mono" data-ph="voltage_r">${fmtN(live.voltage_r,0)}</div></div>
+            <div class="phase-box" data-p="S"><div class="p">S</div><div class="v mono" data-ph="voltage_s">${fmtN(live.voltage_s,0)}</div></div>
+            <div class="phase-box" data-p="T"><div class="p">T</div><div class="v mono" data-ph="voltage_t">${fmtN(live.voltage_t,0)}</div></div>
+          </div>
+        </div>
+        <div class="phase-group">
+          <div class="lbl">Current (A)</div>
+          <div class="phase-row">
+            <div class="phase-box" data-p="R"><div class="p">R</div><div class="v mono" data-ph="current_r">${fmtN(live.current_r,1)}</div></div>
+            <div class="phase-box" data-p="S"><div class="p">S</div><div class="v mono" data-ph="current_s">${fmtN(live.current_s,1)}</div></div>
+            <div class="phase-box" data-p="T"><div class="p">T</div><div class="v mono" data-ph="current_t">${fmtN(live.current_t,1)}</div></div>
+          </div>
+        </div>
+        <div class="kwh-bar">
+          <span class="l">Energy</span>
+          <span class="v mono" data-m="power_kwh">${fmtN(live.power_kwh,0)} <span class="unit" style="font-size:10px;color:var(--ink-3);">kWh</span></span>
+        </div>
+      `;
+    } else if (m.type === 'Environment'){
+      body = `
+        <div class="env-row">
+          <div class="env-box">
+            <div class="icon">🌡️</div>
+            <div class="l">Temp</div>
+            <div class="v mono" data-m="temp">${fmtN(live.temp,1)}<span style="font-size:10px;color:var(--ink-3);font-weight:400;">°C</span></div>
+          </div>
+          <div class="env-box">
+            <div class="icon">💧</div>
+            <div class="l">Humidity</div>
+            <div class="v mono" data-m="humidity">${fmtN(live.humidity,0)}<span style="font-size:10px;color:var(--ink-3);font-weight:400;">%</span></div>
+          </div>
+        </div>
+      `;
+    } else if (m.type === 'Welding'){
+      body = `
+        <div class="metrics c3">
+          <div class="metric"><div class="l">Voltage</div><div class="v" data-m="voltage">${fmtN(live.voltage,0)}<span class="unit">V</span></div></div>
+          <div class="metric"><div class="l">Current</div><div class="v" data-m="current">${fmtN(live.current,0)}<span class="unit">A</span></div></div>
+          <div class="metric"><div class="l">Arc</div><div class="v" data-m="arc_status" style="font-size:11px;">${live.arc_status||'OFF'}</div></div>
+        </div>
+      `;
+    } else {
+      body = `
+        <div class="metrics">
+          <div class="metric"><div class="l">RPM</div><div class="v" data-m="rpm">${fmtN(live.rpm,0)}</div></div>
+          <div class="metric"><div class="l">Suhu</div><div class="v" data-m="temp">${fmtN(live.temp,1)}<span class="unit">°C</span></div></div>
+        </div>
+        <div class="metrics" style="grid-template-columns:1fr;margin-top:8px;">
+          <div class="metric"><div class="l">Vibrasi</div><div class="v" data-m="vibration">${fmtN(live.vibration,2)}<span class="unit">mm/s</span></div></div>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="top">
+        <div style="min-width:0;">
+          <div class="name">
+            <span class="led ${status}"></span>
+            <span class="truncate">${esc(m.name)}</span>
+          </div>
+          <div class="loc">${esc(m.location||'-')}${meta.bay?' · '+meta.bay:''}${meta.station?' · '+meta.station:''}</div>
+        </div>
+        <span class="tag">${esc(m.id)}</span>
+      </div>
+      ${body}
+      <div class="foot">
+        <span>${esc(sub).toUpperCase()}</span>
+        <span>${live.lastSeen ? ago(live.lastSeen)+' ago' : 'never'}</span>
+      </div>
+    `;
+    card.onclick = ()=> App.goMachine(m.id);
+    return card;
+  }
+};
+
+/* ============================================================
+   DETAIL PAGE (RST + trending)
+============================================================ */
+const DetailPage = {
+  machineId: null,
+  charts: {},
+  phaseVolt: 'all',
+  phaseCur: 'all',
+
+  render(id){
+    if (!id) id = State.machines[0]?.id;
+    if (!id){ document.getElementById('view').innerHTML = `<div class="page"><div class="card">No equipment</div></div>`; return; }
+    this.machineId = id;
+    Object.values(this.charts).forEach(c=>{ try{c.destroy();}catch{} });
+    this.charts = {};
+    this.phaseVolt = 'all';
+    this.phaseCur = 'all';
+
+    const m = State.machines.find(x=>x.id===id) || { id, name:id };
+    const live = State.live[id] || {};
+    const status = live.status || 'offline';
+    const c = document.getElementById('view');
+
+    let charts = '';
+    if (['Lathe','Milling','Drilling'].includes(m.type)){
+      charts = `
+        <div class="grid-3">
+          <div class="card"><div class="card-head"><div class="card-title">Temperature (°C)</div></div><div class="chart-box"><canvas id="ch1"></canvas></div></div>
+          <div class="card"><div class="card-head"><div class="card-title">RPM</div></div><div class="chart-box"><canvas id="ch2"></canvas></div></div>
+          <div class="card"><div class="card-head"><div class="card-title">Vibration (mm/s)</div></div><div class="chart-box"><canvas id="ch3"></canvas></div></div>
+        </div>
+      `;
+    } else if (m.type === 'Welding'){
+      charts = `
+        <div class="grid-2">
+          <div class="card"><div class="card-head"><div class="card-title">Voltage (V)</div></div><div class="chart-box"><canvas id="ch1"></canvas></div></div>
+          <div class="card"><div class="card-head"><div class="card-title">Current (A)</div></div><div class="chart-box"><canvas id="ch2"></canvas></div></div>
+        </div>
+      `;
+    } else if (m.type === 'Panel'){
+      // ⚡ FULL RST + TRENDING
+      charts = `
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">3-Phase Voltage (V)</div>
+            <div class="phase-toggles">
+              <button class="phase-btn active" onclick="DetailPage.setVolt('all')">ALL</button>
+              <button class="phase-btn" data-p="R" onclick="DetailPage.setVolt('R')">R</button>
+              <button class="phase-btn" data-p="S" onclick="DetailPage.setVolt('S')">S</button>
+              <button class="phase-btn" data-p="T" onclick="DetailPage.setVolt('T')">T</button>
+            </div>
+          </div>
+          <div class="chart-box"><canvas id="chV"></canvas></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">3-Phase Current (A)</div>
+            <div class="phase-toggles">
+              <button class="phase-btn active" onclick="DetailPage.setCur('all')">ALL</button>
+              <button class="phase-btn" data-p="R" onclick="DetailPage.setCur('R')">R</button>
+              <button class="phase-btn" data-p="S" onclick="DetailPage.setCur('S')">S</button>
+              <button class="phase-btn" data-p="T" onclick="DetailPage.setCur('T')">T</button>
+            </div>
+          </div>
+          <div class="chart-box"><canvas id="chI"></canvas></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">⚡ Energy Record (kWh)</div>
+            <span class="t-muted mono" style="font-size:10px;">kumulatif + Δ per 5 menit</span>
+          </div>
+          <div class="chart-box"><canvas id="chK"></canvas></div>
+        </div>
+      `;
+    } else if (m.type === 'Environment'){
+      charts = `
+        <div class="grid-2">
+          <div class="card"><div class="card-head"><div class="card-title">Temperature (°C)</div></div><div class="chart-box"><canvas id="ch1"></canvas></div></div>
+          <div class="card"><div class="card-head"><div class="card-title">Humidity (%)</div></div><div class="chart-box"><canvas id="ch2"></canvas></div></div>
+        </div>
+      `;
+    }
+
+    const showOee = m.type !== 'Panel';
+
+    c.innerHTML = `
+      <div class="page">
+        <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="min-width:0;">
+            <div class="name" style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;">
+              <span class="led ${status}"></span>${esc(m.name)}
+            </div>
+            <div class="mono t-muted" style="font-size:10px;margin-top:3px;">${esc(m.id)} · ${esc(m.location||'')}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <select id="picker" class="mono" style="padding:6px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);font-size:11px;">
+              ${State.machines.map(x=>`<option value="${x.id}" ${x.id===id?'selected':''}>${esc(x.id)} — ${esc(x.name)}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-4 mobile-2col" id="kpiRow"></div>
+
+        ${charts}
+
+        ${showOee ? `
+          <div class="card">
+            <div class="card-head"><div class="card-title">OEE · Last 7 Days</div></div>
+            <div class="chart-box"><canvas id="chOee"></canvas></div>
+          </div>
+        ` : ''}
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">Alarm History</div></div>
+          <div id="alarmHist" style="max-height:280px;overflow-y:auto;margin:-14px;"></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('picker').addEventListener('change', e => location.hash = `machine/${e.target.value}`);
+
+    this.renderKpi();
+
+    if (['Lathe','Milling','Drilling'].includes(m.type)){
+      this.loadChart('temp','ch1','#f87171');
+      this.loadChart('rpm','ch2','#4ea8de');
+      this.loadChart('vibration','ch3','#a78bfa');
+    } else if (m.type === 'Welding'){
+      this.loadChart('voltage','ch1','#fb923c');
+      this.loadChart('current','ch2','#fbbf24');
+    } else if (m.type === 'Panel'){
+      this.loadRST();
+      this.loadKwh();
+    } else if (m.type === 'Environment'){
+      this.loadChart('temp','ch1','#f87171');
+      this.loadChart('humidity','ch2','#06b6d4');
+    }
+
+    if (showOee) this.loadOee();
+    this.loadAlarms();
+  },
+
+  renderKpi(){
+    const m = State.machines.find(x=>x.id===this.machineId) || {};
+    const live = State.live[this.machineId] || {};
+    const s = live.status || 'offline';
+    let pLabel='Primary', pVal='—';
+    if (['Lathe','Milling','Drilling'].includes(m.type)){ pLabel='RPM'; pVal = fmtN(live.rpm,0); }
+    else if (m.type === 'Welding'){ pLabel='Current'; pVal = fmtN(live.current,0)+' A'; }
+    else if (m.type === 'Panel'){ pLabel='Voltage R'; pVal = fmtN(live.voltage_r,0)+' V'; }
+    else if (m.type === 'Environment'){ pLabel='Temp'; pVal = fmtN(live.temp,1)+' °C'; }
+
+    const el = document.getElementById('kpiRow');
+    if (!el) return;
+    el.innerHTML = `
+      <div class="card"><div class="kpi-label">Status</div>
+        <div class="kpi-value sm" style="display:flex;align-items:center;gap:8px;">
+          <span class="led ${s}"></span>${s.toUpperCase()}
+        </div></div>
+      <div class="card"><div class="kpi-label">Type / Area</div>
+        <div class="kpi-value sm">${esc(m.type||'—')}</div>
+        <div class="kpi-note">${esc(m.metadata?.area||'—')}</div></div>
+      <div class="card"><div class="kpi-label">${pLabel}</div>
+        <div class="kpi-value sm mono">${pVal}</div></div>
+      <div class="card"><div class="kpi-label">Last Seen</div>
+        <div class="kpi-value sm mono">${live.lastSeen ? fmtT(live.lastSeen) : '—'}</div></div>
+    `;
+  },
+
+  async loadChart(metric, id, color){
+    try {
+      const rows = await api(`/telemetry/${this.machineId}?metric=${metric}&interval=5 minutes&limit=200`);
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (this.charts[id]) this.charts[id].destroy();
+      this.charts[id] = new Chart(el.getContext('2d'), {
+        type:'line',
+        data:{ labels: rows.map(r=>fmtT(r.bucket)), datasets:[{
+          data: rows.map(r=>+r.avg_value),
+          borderColor: color, backgroundColor: color+'18',
+          borderWidth: 1.5, tension:.35, fill:true, pointRadius:0, pointHoverRadius:4
+        }]},
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 }},
+          scales:{
+            x:{ grid:{color:Theme.grid()}, ticks:{color:Theme.text(),font:{size:9},maxTicksLimit:6}},
+            y:{ grid:{color:Theme.grid()}, ticks:{color:Theme.text(),font:{size:9}}}
+          }
+        }
+      });
+    } catch(e){ console.error(e); }
+  },
+
+  /* ============ PANEL RST TRENDING ============ */
+  setVolt(phase){
+    this.phaseVolt = phase;
+    document.querySelectorAll('.phase-btn[data-p]').forEach(b=>{
+      const parent = b.closest('.card');
+      const isVoltCard = parent?.querySelector('.card-title')?.textContent.includes('Voltage');
+      if (isVoltCard) b.classList.toggle('active', b.dataset.p === phase);
+      else if (phase === 'all' && !isVoltCard) { /* ignore */ }
+    });
+    // fix: hanya toggle tombol di card voltage
+    const voltCard = document.querySelectorAll('.card')[1];
+    this.loadRST();
+  },
+
+  setCur(phase){
+    this.phaseCur = phase;
+    document.querySelectorAll('.phase-btn[data-p]').forEach(b=>{
+      const parent = b.closest('.card');
+      const isCurCard = parent?.querySelector('.card-title')?.textContent.includes('Current');
+      if (isCurCard) b.classList.toggle('active', b.dataset.p === phase);
+    });
+    this.loadRST();
+  },
+
+  async loadRST(){
+    const grid = Theme.grid(), text = Theme.text();
+    try {
+      const [vR, vS, vT, iR, iS, iT] = await Promise.all([
+        api(`/telemetry/${this.machineId}?metric=voltage_r&interval=5 minutes&limit=200`),
+        api(`/telemetry/${this.machineId}?metric=voltage_s&interval=5 minutes&limit=200`),
+        api(`/telemetry/${this.machineId}?metric=voltage_t&interval=5 minutes&limit=200`),
+        api(`/telemetry/${this.machineId}?metric=current_r&interval=5 minutes&limit=200`),
+        api(`/telemetry/${this.machineId}?metric=current_s&interval=5 minutes&limit=200`),
+        api(`/telemetry/${this.machineId}?metric=current_t&interval=5 minutes&limit=200`)
+      ]);
+
+      // Voltage
+      const vEl = document.getElementById('chV');
+      if (vEl){
+        if (this.charts.v) this.charts.v.destroy();
+        const ds = [];
+        if (this.phaseVolt==='all' || this.phaseVolt==='R') ds.push({ label:'R (V)', data: vR.map(r=>+r.avg_value), borderColor:'#ef4444', backgroundColor:'#ef444415', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+        if (this.phaseVolt==='all' || this.phaseVolt==='S') ds.push({ label:'S (V)', data: vS.map(r=>+r.avg_value), borderColor:'#eab308', backgroundColor:'#eab30815', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+        if (this.phaseVolt==='all' || this.phaseVolt==='T') ds.push({ label:'T (V)', data: vT.map(r=>+r.avg_value), borderColor:'#06b6d4', backgroundColor:'#06b6d415', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+
+        this.charts.v = new Chart(vEl.getContext('2d'), {
+          type:'line',
+          data:{ labels: vR.map(r=>fmtT(r.bucket)), datasets: ds },
+          options:{
+            responsive:true, maintainAspectRatio:false,
+            interaction:{mode:'index',intersect:false},
+            plugins:{
+              legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } },
+              tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 }
+            },
+            scales:{
+              x:{ grid:{color:grid}, ticks:{color:text,font:{size:9},maxTicksLimit:6} },
+              y:{ grid:{color:grid}, ticks:{color:text,font:{size:9}, callback:v=>v} }
+            }
+          }
+        });
+      }
+
+      // Current
+      const iEl = document.getElementById('chI');
+      if (iEl){
+        if (this.charts.i) this.charts.i.destroy();
+        const ds = [];
+        if (this.phaseCur==='all' || this.phaseCur==='R') ds.push({ label:'R (A)', data: iR.map(r=>+r.avg_value), borderColor:'#ef4444', backgroundColor:'#ef444415', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+        if (this.phaseCur==='all' || this.phaseCur==='S') ds.push({ label:'S (A)', data: iS.map(r=>+r.avg_value), borderColor:'#eab308', backgroundColor:'#eab30815', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+        if (this.phaseCur==='all' || this.phaseCur==='T') ds.push({ label:'T (A)', data: iT.map(r=>+r.avg_value), borderColor:'#06b6d4', backgroundColor:'#06b6d415', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+
+        this.charts.i = new Chart(iEl.getContext('2d'), {
+          type:'line',
+          data:{ labels: iR.map(r=>fmtT(r.bucket)), datasets: ds },
+          options:{
+            responsive:true, maintainAspectRatio:false,
+            interaction:{mode:'index',intersect:false},
+            plugins:{
+              legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } },
+              tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 }
+            },
+            scales:{
+              x:{ grid:{color:grid}, ticks:{color:text,font:{size:9},maxTicksLimit:6} },
+              y:{ grid:{color:grid}, ticks:{color:text,font:{size:9}, callback:v=>v} }
+            }
+          }
+        });
+      }
+    } catch(e){ console.error('[RST]', e); }
+  },
+
+  async loadKwh(){
+    try {
+      const rows = await api(`/telemetry/${this.machineId}?metric=power_kwh&interval=5 minutes&limit=200`);
+      const el = document.getElementById('chK');
+      if (!el) return;
+      if (this.charts.k) this.charts.k.destroy();
+      const grid = Theme.grid(), text = Theme.text();
+      const vals = rows.map(r=>+r.avg_value);
+      const deltas = vals.map((v,i)=> i===0 ? 0 : Math.max(0, v - vals[i-1]));
+
+      this.charts.k = new Chart(el.getContext('2d'), {
+        type:'line',
+        data:{
+          labels: rows.map(r=>fmtT(r.bucket)),
+          datasets:[
+            { label:'kWh (kumulatif)', data: vals, borderColor:'#fbbf24', backgroundColor:'#fbbf2415', borderWidth:1.5, tension:.3, fill:true, pointRadius:0, yAxisID:'y' },
+            { label:'Δ kWh / 5min', data: deltas, borderColor:'#06b6d4', borderWidth:1.2, borderDash:[4,3], tension:.3, fill:false, pointRadius:0, yAxisID:'y1' }
+          ]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          interaction:{mode:'index',intersect:false},
+          plugins:{
+            legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } },
+            tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 }
+          },
+          scales:{
+            x:{ grid:{color:grid}, ticks:{color:text,font:{size:9},maxTicksLimit:6} },
+            y:{ position:'left', grid:{color:grid}, ticks:{color:'#fbbf24',font:{size:9}} },
+            y1:{ position:'right', grid:{display:false}, ticks:{color:'#06b6d4',font:{size:9}} }
+          }
+        }
+      });
+    } catch(e){ console.error(e); }
+  },
+
+  async loadOee(){
+    try {
+      const rows = await api(`/oee/${this.machineId}?from=NOW() - INTERVAL '7 days'`);
+      const el = document.getElementById('chOee');
+      if (!el) return;
+      if (this.charts.oee) this.charts.oee.destroy();
+      const grid = Theme.grid(), text = Theme.text();
+      this.charts.oee = new Chart(el.getContext('2d'), {
+        type:'line',
+        data:{
+          labels: rows.map(r=>new Date(r.bucket).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})),
+          datasets:[
+            { label:'OEE', data:rows.map(r=>+r.avg_oee), borderColor:'#4ea8de', tension:.3, fill:false, borderWidth:2, pointRadius:3 },
+            { label:'Availability', data:rows.map(r=>+r.avg_availability), borderColor:'#4ade80', tension:.3, fill:false, borderWidth:1.2, pointRadius:0 },
+            { label:'Performance', data:rows.map(r=>+r.avg_performance), borderColor:'#fbbf24', tension:.3, fill:false, borderWidth:1.2, pointRadius:0 },
+            { label:'Quality', data:rows.map(r=>+r.avg_quality), borderColor:'#a78bfa', tension:.3, fill:false, borderWidth:1.2, pointRadius:0 }
+          ]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } } },
+          scales:{
+            x:{ grid:{color:grid}, ticks:{color:text,font:{size:9}} },
+            y:{ grid:{color:grid}, ticks:{color:text,font:{size:9}, callback:v=>v+'%'} }
+          }
+        }
+      });
+    } catch(e){ console.error(e); }
+  },
+
+  async loadAlarms(){
+    try {
+      const rows = await api('/alarms?status=active&limit=100');
+      const mine = rows.filter(r=>r.machine_id === this.machineId);
+      const el = document.getElementById('alarmHist');
+      if (!el) return;
+      if (!mine.length){
+        el.innerHTML = `<div class="empty">No active alarms</div>`;
+        return;
+      }
+      el.innerHTML = mine.map(a=>`
+        <div class="alarm" data-sev="${a.severity}">
+          <span class="sev">${a.severity}</span>
+          <div class="body">
+            <div class="t">${esc(a.message)}</div>
+            <div class="m mono">value: ${a.value ?? '—'}</div>
+          </div>
+          <div class="time">${ago(a.raised_at)}</div>
+          ${Auth.canOperate() ? `<button class="btn btn-sm" onclick="DetailPage.ack(${a.id})">ACK</button>` : ''}
+        </div>
+      `).join('');
+    } catch(e){}
+  },
+
+  async ack(id){
+    try { await api(`/alarms/${id}/ack`,{method:'POST'}); this.loadAlarms(); App.loadAlarms(); } catch(e){ alert(e.message); }
+  },
+
+  onTele(d){
+    this.renderKpi();
+    // Realtime update chart RST
+    if (['voltage_r','voltage_s','voltage_t'].includes(d.metric) && this.charts.v){
+      const ch = this.charts.v;
+      const ph = d.metric.split('_')[1].toUpperCase();
+      const idx = ch.data.datasets.findIndex(x => x.label.startsWith(ph));
+      if (idx >= 0){
+        ch.data.datasets[idx].data.push(d.value);
+        if (ch.data.labels.length < ch.data.datasets[idx].data.length) ch.data.labels.push(fmtT(new Date()));
+        if (ch.data.labels.length > 200){
+          ch.data.labels.shift();
+          ch.data.datasets.forEach(ds => ds.data.shift());
+        }
+        ch.update('none');
+      }
+    }
+    if (['current_r','current_s','current_t'].includes(d.metric) && this.charts.i){
+      const ch = this.charts.i;
+      const ph = d.metric.split('_')[1].toUpperCase();
+      const idx = ch.data.datasets.findIndex(x => x.label.startsWith(ph));
+      if (idx >= 0){
+        ch.data.datasets[idx].data.push(d.value);
+        if (ch.data.labels.length < ch.data.datasets[idx].data.length) ch.data.labels.push(fmtT(new Date()));
+        if (ch.data.labels.length > 200){
+          ch.data.labels.shift();
+          ch.data.datasets.forEach(ds => ds.data.shift());
+        }
+        ch.update('none');
+      }
+    }
+    if (d.metric === 'power_kwh' && this.charts.k){
+      const ch = this.charts.k;
+      const last = ch.data.datasets[0].data[ch.data.datasets[0].data.length-1] || 0;
+      ch.data.labels.push(fmtT(new Date()));
+      ch.data.datasets[0].data.push(d.value);
+      ch.data.datasets[1].data.push(Math.max(0, d.value - last));
+      if (ch.data.labels.length > 200){
+        ch.data.labels.shift();
+        ch.data.datasets.forEach(ds => ds.data.shift());
+      }
+      ch.update('none');
+    }
+  }
+};
+
+/* ============================================================
+   ALARMS
+============================================================ */
+const AlarmsPage = {
+  filter: 'active',
+  render(){
+    const c = document.getElementById('view');
+    c.innerHTML = `
+      <div class="page">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Alarm Center</div>
+            <select id="flt" style="padding:5px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);font-size:11px;">
+              <option value="active">Active</option>
+              <option value="acknowledged">Acknowledged</option>
+              <option value="cleared">Cleared</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr>
+                <th>Time</th><th>Severity</th><th>Machine</th><th>Message</th><th>Value</th><th>Status</th><th></th>
+              </tr></thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('flt').value = this.filter;
+    document.getElementById('flt').addEventListener('change', e=>{ this.filter = e.target.value; this.load(); });
+    this.load();
+  },
+  async load(){
+    try {
+      const rows = await api(`/alarms?status=${this.filter}&limit=200`);
+      const tb = document.getElementById('rows');
+      if (!tb) return;
+      if (!rows.length){ tb.innerHTML = `<tr><td colspan="7"><div class="empty">No alarms</div></td></tr>`; return; }
+      tb.innerHTML = rows.map(a=>`
+        <tr>
+          <td class="mono t-muted" style="font-size:10px;">${fmtD(a.raised_at)}</td>
+          <td><span class="alarm" data-sev="${a.severity}" style="padding:0;border:none;"><span class="sev">${a.severity}</span></span></td>
+          <td><strong>${esc(a.machine_name||a.machine_id)}</strong></td>
+          <td>${esc(a.message)}</td>
+          <td class="mono">${a.value ?? '—'}</td>
+          <td class="t-muted" style="font-size:10px;">${a.status}</td>
+          <td style="text-align:right;">
+            ${a.status==='active' && Auth.canOperate() ? `<button class="btn btn-sm" onclick="AlarmsPage.ack(${a.id})">ACK</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    } catch(e){}
+  },
+  async ack(id){
+    try { await api(`/alarms/${id}/ack`,{method:'POST'}); this.load(); App.loadAlarms(); } catch(e){ alert(e.message); }
+  }
+};
+
+/* ============================================================
+   REPORTS
+============================================================ */
+const ReportsPage = {
+  render(){
+    const c = document.getElementById('view');
+    const today = new Date().toISOString().slice(0,10);
+    c.innerHTML = `
+      <div class="page">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Shift Report</div></div>
+          <div class="grid-3">
+            <div class="field"><label>Date</label><input type="date" id="rpDate" value="${today}" style="padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);"></div>
+            <div class="field"><label>Shift</label>
+              <select id="rpShift" style="padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+                <option value="all">All (24h)</option>
+                <option value="1">Shift 1 (08-16)</option>
+                <option value="2">Shift 2 (16-24)</option>
+                <option value="3">Shift 3 (00-08)</option>
+              </select>
+            </div>
+            <div class="field"><label>Area</label>
+              <select id="rpArea" style="padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+                <option value="all">All Areas</option>
+                <option value="Machining">Machining</option>
+                <option value="Welding">Welding</option>
+                <option value="Power">Power</option>
+                <option value="Facility">Facility</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+            <button class="btn btn-primary" onclick="ReportsPage.csv()">⬇ CSV</button>
+            <button class="btn btn-primary" onclick="ReportsPage.pdf()">📄 PDF</button>
+            <button class="btn" onclick="ReportsPage.csvAlarms()">🚨 Alarms CSV</button>
+            <button class="btn" onclick="ReportsPage.csvOee()">📈 OEE CSV</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">Preview</div><span class="mono t-muted" style="font-size:10px;" id="rpSum"></span></div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr><th>Tag</th><th>Equipment</th><th>Type</th><th>Area</th><th>Status</th><th>Primary</th><th>Last Seen</th></tr></thead>
+              <tbody id="rpRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+    this.refresh();
+  },
+
+  filtered(){
+    const a = document.getElementById('rpArea')?.value || 'all';
+    return a === 'all' ? State.machines : State.machines.filter(m => m.metadata?.area === a);
+  },
+
+  refresh(){
+    const list = this.filtered();
+    const tb = document.getElementById('rpRows');
+    const sum = document.getElementById('rpSum');
+    if (!tb) return;
+    sum.textContent = `${list.length} equipment`;
+    tb.innerHTML = list.map(m=>{
+      const live = State.live[m.id] || {};
+      const s = live.status || 'offline';
+      let p = '—';
+      if (['Lathe','Milling','Drilling'].includes(m.type)) p = fmtN(live.rpm,0)+' RPM';
+      else if (m.type === 'Welding') p = fmtN(live.current,0)+' A';
+      else if (m.type === 'Panel') p = `${fmtN(live.voltage_r,0)}V / ${fmtN(live.current_r,1)}A`;
+      else if (m.type === 'Environment') p = `${fmtN(live.temp,1)}°C / ${fmtN(live.humidity,0)}%`;
+      return `<tr>
+        <td class="mono t-muted" style="font-size:10px;">${esc(m.id)}</td>
+        <td><strong>${esc(m.name)}</strong></td>
+        <td class="t-muted">${esc(m.type)}</td>
+        <td class="t-muted">${esc(m.metadata?.area||'—')}</td>
+        <td><span class="led ${s}"></span> <span class="${statusCls(s)}">${s}</span></td>
+        <td class="mono">${p}</td>
+        <td class="mono t-muted">${live.lastSeen ? fmtT(live.lastSeen) : '—'}</td>
+      </tr>`;
+    }).join('');
+  },
+
+  csv(){
+    const list = this.filtered();
+    const date = document.getElementById('rpDate')?.value || new Date().toISOString().slice(0,10);
+    const shift = document.getElementById('rpShift')?.value || 'all';
+    const area = document.getElementById('rpArea')?.value || 'all';
+    const rows = [
+      ['EVE WORKSHOP - SHIFT REPORT'],
+      ['Generated', new Date().toLocaleString('id-ID')],
+      ['Date', date], ['Shift', shift], ['Area', area], [],
+      ['Tag','Equipment','Type','Area','Location','Status','Primary Metric','Last Seen']
+    ];
+    list.forEach(m=>{
+      const live = State.live[m.id] || {};
+      const s = live.status || 'offline';
+      let p = '';
+      if (['Lathe','Milling','Drilling'].includes(m.type)) p = fmtN(live.rpm,0)+' RPM';
+      else if (m.type === 'Welding') p = fmtN(live.current,0)+' A';
+      else if (m.type === 'Panel') p = `${fmtN(live.voltage_r,0)}V / ${fmtN(live.current_r,1)}A`;
+      else if (m.type === 'Environment') p = `${fmtN(live.temp,1)}C / ${fmtN(live.humidity,0)}%`;
+      rows.push([m.id, m.name, m.type, m.metadata?.area||'', m.location||'', s, p, live.lastSeen ? fmtD(live.lastSeen) : '']);
+    });
+    const csv = rows.map(r=>r.map(v=>{ const s = String(v??''); return s.includes(',')||s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s; }).join(',')).join('\n');
+    dl('\ufeff'+csv, `EVE-Shift-${date}.csv`, 'text/csv;charset=utf-8');
+  },
+
+  pdf(){
+    const list = this.filtered();
+    const date = document.getElementById('rpDate')?.value || new Date().toISOString().slice(0,10);
+    const shift = document.getElementById('rpShift')?.value || 'all';
+    const area = document.getElementById('rpArea')?.value || 'all';
+    const shiftLabel = { all:'All (24h)', '1':'Shift 1 (08-16)', '2':'Shift 2 (16-24)', '3':'Shift 3 (00-08)' }[shift];
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+
+    doc.setFontSize(14); doc.setFont(undefined,'bold');
+    doc.text('EVE WORKSHOP', 14, 15);
+    doc.setFontSize(9); doc.setFont(undefined,'normal');
+    doc.text('Shift Report', 14, 20);
+    doc.text(`Date: ${date}  |  Shift: ${shiftLabel}  |  Area: ${area}`, 200, 15);
+    doc.text(`Generated: ${new Date().toLocaleString('id-ID')}`, 200, 20);
+
+    const body = list.map(m=>{
+      const live = State.live[m.id] || {};
+      const s = live.status || 'offline';
+      let p = '—';
+      if (['Lathe','Milling','Drilling'].includes(m.type)) p = fmtN(live.rpm,0)+' RPM';
+      else if (m.type === 'Welding') p = fmtN(live.current,0)+' A';
+      else if (m.type === 'Panel') p = `${fmtN(live.voltage_r,0)}V / ${fmtN(live.current_r,1)}A`;
+      else if (m.type === 'Environment') p = `${fmtN(live.temp,1)}°C / ${fmtN(live.humidity,0)}%`;
+      return [m.id, m.name, m.type, m.metadata?.area||'', s, p];
+    });
+
+    doc.autoTable({
+      startY: 26,
+      head: [['Tag','Equipment','Type','Area','Status','Primary']],
+      body, theme:'grid',
+      headStyles:{ fillColor:[78,168,222], textColor:255, fontSize:9 },
+      styles:{ fontSize:8, cellPadding:2.5 }
+    });
+
+    doc.save(`EVE-Shift-${date}.pdf`);
+  },
+
+  csvAlarms(){
+    const rows = [['EVE WORKSHOP - ALARMS'], ['Generated', new Date().toLocaleString('id-ID')], [], ['Time','Severity','Machine ID','Machine','Message','Value','Status']];
+    State.alarms.forEach(a=>rows.push([fmtD(a.raised_at), a.severity, a.machine_id, a.machine_name||'', a.message, a.value??'', a.status]));
+    const csv = rows.map(r=>r.map(v=>{ const s = String(v??''); return s.includes(',') ? `"${s}"` : s; }).join(',')).join('\n');
+    dl('\ufeff'+csv, `EVE-Alarms-${new Date().toISOString().slice(0,10)}.csv`, 'text/csv;charset=utf-8');
+  },
+
+  csvOee(){
+    const rows = [['EVE WORKSHOP - OEE'], ['Generated', new Date().toLocaleString('id-ID')], [], ['Machine','OEE %','Availability','Performance','Quality']];
+    State.oee.forEach(r=>rows.push([r.machine_id, (+r.oee).toFixed(2), (+r.availability).toFixed(2), (+r.performance).toFixed(2), (+r.quality).toFixed(2)]));
+    const csv = rows.map(r=>r.join(',')).join('\n');
+    dl('\ufeff'+csv, `EVE-OEE-${new Date().toISOString().slice(0,10)}.csv`, 'text/csv;charset=utf-8');
+  }
+};
+
+/* ============================================================
+   SETTINGS
+============================================================ */
+const SettingsPage = {
+  render(){
+    const s = Settings.get();
+    const c = document.getElementById('view');
+    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    c.innerHTML = `
+      <div class="page">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Profile</div></div>
+          <div class="grid-2">
+            <div class="field"><label>Username</label><input value="${esc(Auth.user?.username||'')}" disabled></div>
+            <div class="field"><label>Role</label><input value="${esc((Auth.user?.role||'').toUpperCase())}" disabled></div>
+            <div class="field"><label>Display Name</label><input value="${esc(Auth.user?.name||'')}" disabled></div>
+            <div class="field"><label>Mode</label><input value="${CONFIG.DEMO_MODE?'DEMO':'LIVE'}" disabled></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">Appearance</div></div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Theme</label>
+              <select id="setTheme" style="padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+                <option value="dark" ${cur==='dark'?'selected':''}>Dark</option>
+                <option value="light" ${cur==='light'?'selected':''}>Light</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:flex-end;"><button class="btn btn-primary" onclick="SettingsPage.applyTheme()">Apply</button></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Alarm Thresholds</div>
+            <span class="t-muted mono" style="font-size:10px;">${Auth.isAdmin()?'editable':'read-only'}</span>
+          </div>
+          <div class="grid-3">
+            <div class="field"><label>Temp Warning (°C)</label><input type="number" id="s1" value="${s.tempWarning}" ${!Auth.isAdmin()?'disabled':''}></div>
+            <div class="field"><label>Temp Critical (°C)</label><input type="number" id="s2" value="${s.tempCritical}" ${!Auth.isAdmin()?'disabled':''}></div>
+            <div class="field"><label>Vib Warning (mm/s)</label><input type="number" step="0.1" id="s3" value="${s.vibrationWarning}" ${!Auth.isAdmin()?'disabled':''}></div>
+            <div class="field"><label>Vib Critical (mm/s)</label><input type="number" step="0.1" id="s4" value="${s.vibrationCritical}" ${!Auth.isAdmin()?'disabled':''}></div>
+            <div class="field"><label>Voltage Min (V)</label><input type="number" id="s5" value="${s.voltageMin}" ${!Auth.isAdmin()?'disabled':''}></div>
+            <div class="field"><label>Humidity Warn (%)</label><input type="number" id="s6" value="${s.humidityWarning}" ${!Auth.isAdmin()?'disabled':''}></div>
+          </div>
+          ${Auth.isAdmin() ? `
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="btn btn-primary" onclick="SettingsPage.save()">Save</button>
+              <button class="btn btn-danger" onclick="SettingsPage.reset()">Reset</button>
+            </div>
+          ` : `<p class="t-muted" style="font-size:11px;margin-top:8px;">Only admin can edit thresholds.</p>`}
+          <p id="saveMsg" style="font-size:11px;margin-top:8px;min-height:14px;"></p>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">System</div></div>
+          <div style="font-size:12px;line-height:1.9;">
+            <div><span class="t-muted">Version:</span> <span class="mono">v1.0</span></div>
+            <div><span class="t-muted">API:</span> <span class="mono" style="font-size:10px;">${esc(CONFIG.API_BASE)}</span></div>
+            <div><span class="t-muted">Socket:</span> <span class="mono" style="font-size:10px;">${esc(CONFIG.SOCKET_URL)}</span></div>
+            <div><span class="t-muted">Assets:</span> <strong>${State.machines.length}</strong></div>
+            <div><span class="t-muted">Active alarms:</span> <strong class="t-bad">${State.alarms.length}</strong></div>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  applyTheme(){
+    const v = document.getElementById('setTheme').value;
+    document.documentElement.setAttribute('data-theme', v);
+    localStorage.setItem('eve_theme', v);
+    Theme.updateIcon();
+    SettingsPage.render();
+  },
+
+  save(){
+    const s = {
+      tempWarning: +document.getElementById('s1').value,
+      tempCritical: +document.getElementById('s2').value,
+      vibrationWarning: +document.getElementById('s3').value,
+      vibrationCritical: +document.getElementById('s4').value,
+      voltageMin: +document.getElementById('s5').value,
+      humidityWarning: +document.getElementById('s6').value,
+      shiftStart: '08:00', shiftEnd: '16:00'
+    };
+    Settings.save(s);
+    if (CONFIG.DEMO_MODE) DemoAPI.thresholds = s;
+    const m = document.getElementById('saveMsg');
+    m.style.color = 'var(--ok)'; m.textContent = 'Saved';
+    setTimeout(()=>m.textContent = '', 2500);
+  },
+
+  reset(){
+    if (!confirm('Reset settings?')) return;
+    Settings.reset();
+    this.render();
+  }
+};
+
+/* ============================================================
+   ADMIN
+============================================================ */
+const AdminPage = {
+  render(){
+    if (!Auth.isAdmin()){
+      document.getElementById('view').innerHTML = `<div class="page"><div class="card"><div class="empty">🔒 Admin access required</div></div></div>`;
+      return;
+    }
+    const c = document.getElementById('view');
+    c.innerHTML = `
+      <div class="page">
+        <div class="grid-4 mobile-2col">
+          <div class="card"><div class="kpi-label">Total</div><div class="kpi-value">${State.machines.length}</div></div>
+          <div class="card"><div class="kpi-label">Machining</div><div class="kpi-value t-brand">${State.machines.filter(m=>m.metadata?.area==='Machining').length}</div></div>
+          <div class="card"><div class="kpi-label">Welding</div><div class="kpi-value" style="color:var(--idle);">${State.machines.filter(m=>m.metadata?.area==='Welding').length}</div></div>
+          <div class="card"><div class="kpi-label">Power + Facility</div><div class="kpi-value t-warn">${State.machines.filter(m=>['Power','Facility'].includes(m.metadata?.area)).length}</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Equipment Registry</div>
+            <button class="btn btn-primary btn-sm" onclick="AdminPage.openAdd()">+ Add</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr><th>Tag</th><th>Name</th><th>Type</th><th>Area</th><th>Status</th><th></th></tr></thead>
+              <tbody id="eqRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+    this.renderTable();
+  },
+
+  renderTable(){
+    const tb = document.getElementById('eqRows');
+    if (!tb) return;
+    if (!State.machines.length){
+      tb.innerHTML = `<tr><td colspan="6"><div class="empty">No equipment yet</div></td></tr>`;
+      return;
+    }
+    tb.innerHTML = State.machines.map(m=>{
+      const s = State.live[m.id]?.status || 'offline';
+      return `<tr>
+        <td class="mono t-muted" style="font-size:10px;">${esc(m.id)}</td>
+        <td><strong>${esc(m.name)}</strong></td>
+        <td class="t-muted">${esc(m.type)}</td>
+        <td class="t-muted">${esc(m.metadata?.area||'—')}</td>
+        <td><span class="led ${s}"></span> <span class="${statusCls(s)}">${s}</span></td>
+        <td style="text-align:right;">
+          <button class="btn btn-sm" onclick="App.goMachine('${m.id}')">View</button>
+          <button class="btn btn-sm btn-danger" onclick="AdminPage.confirmDel('${m.id}')">Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+  },
+
+  openAdd(){
+    document.getElementById('modalRoot').innerHTML = `
+      <div class="modal-back" onclick="if(event.target===this)AdminPage.close()">
+        <div class="modal">
+          <div class="modal-head">
+            <h3>Add Equipment</h3>
+            <button class="btn btn-sm" onclick="AdminPage.close()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="field"><label>Asset Tag *</label><input class="mono" id="aTag" placeholder="MW-LT04"></div>
+            <div class="field"><label>Name *</label><input id="aName" placeholder="Lathe Machine #04"></div>
+            <div class="field"><label>Type *</label>
+              <select id="aType" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+                <option value="Lathe">Lathe Machine</option>
+                <option value="Milling">Milling Machine</option>
+                <option value="Drilling">Drilling Machine</option>
+                <option value="Welding">Welding Machine</option>
+                <option value="Panel">Electrical Panel</option>
+                <option value="Environment">Environment Sensor</option>
+              </select>
+            </div>
+            <div class="field"><label>Area *</label>
+              <select id="aArea" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+                <option value="Machining">Machining</option>
+                <option value="Welding">Welding</option>
+                <option value="Power">Power</option>
+                <option value="Facility">Facility</option>
+              </select>
+            </div>
+            <div class="field"><label>Location</label><input id="aLoc" placeholder="Machining Area"></div>
+            <div class="field"><label>Bay / Station / Room</label><input id="aBay" placeholder="A4"></div>
+            <p id="aErr" style="color:var(--bad);font-size:11px;margin-top:6px;min-height:14px;"></p>
+          </div>
+          <div class="modal-foot">
+            <button class="btn" onclick="AdminPage.close()">Cancel</button>
+            <button class="btn btn-primary" onclick="AdminPage.submitAdd()">Add</button>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  close(){ document.getElementById('modalRoot').innerHTML = ''; },
+
+  async submitAdd(){
+    const err = document.getElementById('aErr');
+    const tag = document.getElementById('aTag').value.trim();
+    const name = document.getElementById('aName').value.trim();
+    const type = document.getElementById('aType').value;
+    const area = document.getElementById('aArea').value;
+    const loc = document.getElementById('aLoc').value.trim();
+    const bay = document.getElementById('aBay').value.trim();
+    if (!tag || !name){ err.textContent = 'Tag & Name required'; return; }
+    if (State.machines.find(m=>m.id === tag)){ err.textContent = 'Tag already exists'; return; }
+    const machine = { id:tag, name, type, location: loc || area, metadata:{ area } };
+    if (bay) machine.metadata.section = bay;
+    try {
+      if (CONFIG.DEMO_MODE){
+        DemoAPI.addMachine(machine);
+        State.machines.push(machine);
+        State.live[tag] = DemoAPI.createInitialState(machine);
+      } else {
+        await api('/machines', { method:'POST', body: JSON.stringify(machine) });
+        State.machines.push(machine);
+      }
+      this.close();
+      this.render();
+      document.getElementById('tkAssets').textContent = State.machines.length;
+    } catch (e){ err.textContent = '⚠ ' + e.message; }
+  },
+
+  confirmDel(id){
+    const m = State.machines.find(x=>x.id === id);
+    if (!m) return;
+    document.getElementById('modalRoot').innerHTML = `
+      <div class="modal-back" onclick="if(event.target===this)AdminPage.close()">
+        <div class="modal" style="max-width:380px;">
+          <div class="modal-head"><h3>Delete Equipment</h3><button class="btn btn-sm" onclick="AdminPage.close()">✕</button></div>
+          <div class="modal-body">
+            <p style="font-size:12px;line-height:1.6;">
+              Delete <strong>${esc(m.name)}</strong> (<span class="mono">${esc(m.id)}</span>)?
+            </p>
+            <p class="t-muted" style="font-size:11px;margin-top:8px;">This cannot be undone.</p>
+          </div>
+          <div class="modal-foot">
+            <button class="btn" onclick="AdminPage.close()">Cancel</button>
+            <button class="btn btn-danger" onclick="AdminPage.doDel('${id}')">Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  async doDel(id){
+    try {
+      if (CONFIG.DEMO_MODE){
+        DemoAPI.removeMachine(id);
+        State.machines = State.machines.filter(m=>m.id !== id);
+        delete State.live[id];
+      } else {
+        await api(`/machines/${id}`, { method:'DELETE' });
+        State.machines = State.machines.filter(m=>m.id !== id);
+        delete State.live[id];
+      }
+      this.close();
+      this.render();
+      document.getElementById('tkAssets').textContent = State.machines.length;
+    } catch(e){ alert(e.message); }
+  }
+};
+
+/* ============================================================
+   DEMO API
+============================================================ */
+const DemoAPI = {
+  machines: [
+    { id:'MW-LT01', name:'Lathe Machine #01', type:'Lathe', location:'Machining Area', metadata:{area:'Machining', section:'Lathe', bay:'A1'} },
+    { id:'MW-LT02', name:'Lathe Machine #02', type:'Lathe', location:'Machining Area', metadata:{area:'Machining', section:'Lathe', bay:'A2'} },
+    { id:'MW-LT03', name:'Lathe Machine #03', type:'Lathe', location:'Machining Area', metadata:{area:'Machining', section:'Lathe', bay:'A3'} },
+    { id:'MW-ML01', name:'Milling Machine #01', type:'Milling', location:'Machining Area', metadata:{area:'Machining', section:'Milling', bay:'B1'} },
+    { id:'MW-ML02', name:'Milling Machine #02', type:'Milling', location:'Machining Area', metadata:{area:'Machining', section:'Milling', bay:'B2'} },
+    { id:'MW-ML03', name:'Milling Machine #03', type:'Milling', location:'Machining Area', metadata:{area:'Machining', section:'Milling', bay:'B3'} },
+    { id:'MW-DR01', name:'Drilling Machine #01', type:'Drilling', location:'Machining Area', metadata:{area:'Machining', section:'Drilling', bay:'C1'} },
+    { id:'MW-DR02', name:'Drilling Machine #02', type:'Drilling', location:'Machining Area', metadata:{area:'Machining', section:'Drilling', bay:'C2'} },
+    { id:'MW-DR03', name:'Drilling Machine #03', type:'Drilling', location:'Machining Area', metadata:{area:'Machining', section:'Drilling', bay:'C3'} },
+    { id:'WA-WM01', name:'Welding Machine #01', type:'Welding', location:'Welding Area', metadata:{area:'Welding', station:'W1'} },
+    { id:'WA-WM02', name:'Welding Machine #02', type:'Welding', location:'Welding Area', metadata:{area:'Welding', station:'W2'} },
+    { id:'WA-WM03', name:'Welding Machine #03', type:'Welding', location:'Welding Area', metadata:{area:'Welding', station:'W3'} },
+    { id:'PW-PN00', name:'Main Distribution Panel', type:'Panel', location:'Electrical Room', metadata:{area:'Power', subtype:'Main'} },
+    { id:'PW-PN01', name:'Hydraulic System Panel', type:'Panel', location:'Machining Area', metadata:{area:'Power', subtype:'Hydraulic'} },
+    { id:'PW-PN02', name:'Machining Section Panel', type:'Panel', location:'Machining Area', metadata:{area:'Power', subtype:'Machining'} },
+    { id:'PW-PN03', name:'Workbench & Project Panel', type:'Panel', location:'Workshop Hall', metadata:{area:'Power', subtype:'Workbench'} },
+    { id:'PW-PN04', name:'Office Distribution Panel', type:'Panel', location:'Office Area', metadata:{area:'Power', subtype:'Office'} },
+    { id:'FA-EN01', name:'Office Env Sensor', type:'Environment', location:'Office', metadata:{area:'Facility', room:'Office'} },
+    { id:'FA-EN02', name:'Classroom Env Sensor', type:'Environment', location:'Classroom', metadata:{area:'Facility', room:'Classroom'} },
+    { id:'FA-EN03', name:'Toolroom Env Sensor', type:'Environment', location:'Toolroom', metadata:{area:'Facility', room:'Toolroom'} },
+    { id:'FA-EN04', name:'Meeting Room Env Sensor', type:'Environment', location:'Meeting Room', metadata:{area:'Facility', room:'Meeting Room'} },
+    { id:'FA-EN05', name:'Module Room Env Sensor', type:'Environment', location:'Module Room', metadata:{area:'Facility', room:'Module Room'} }
+  ],
+  state: {}, alarms: [], alarmId: 1, simulated: false, historyCache: {}, thresholds: null,
+
+  createInitialState(m){
+    const b = { lastSeen: new Date().toISOString() };
+    switch(m.type){
+      case 'Lathe': Object.assign(b, { status:['running','running','idle'][Math.floor(Math.random()*3)], rpm:1200+Math.random()*800, temp:40+Math.random()*20, vibration:1+Math.random()*2 }); break;
+      case 'Milling': Object.assign(b, { status:['running','running','idle'][Math.floor(Math.random()*3)], rpm:2000+Math.random()*1500, temp:45+Math.random()*20, vibration:1.5+Math.random()*2 }); break;
+      case 'Drilling': Object.assign(b, { status:['running','idle'][Math.floor(Math.random()*2)], rpm:800+Math.random()*600, temp:38+Math.random()*15, vibration:1+Math.random()*2.5 }); break;
+      case 'Welding': Object.assign(b, { status:['running','idle','running'][Math.floor(Math.random()*3)], voltage:20+Math.random()*5, current:80+Math.random()*60, arc_status:Math.random()>0.4?'ON':'OFF' }); break;
+      case 'Panel': Object.assign(b, { status:'running',
+        voltage_r:220+Math.random()*5, voltage_s:219+Math.random()*5, voltage_t:221+Math.random()*5,
+        current_r:50+Math.random()*15, current_s:52+Math.random()*15, current_t:48+Math.random()*15,
+        power_kwh:1200+Math.random()*300 }); break;
+      case 'Environment': Object.assign(b, { status:'running', temp:24+Math.random()*6, humidity:50+Math.random()*25 }); break;
+    }
+    return b;
+  },
+
+  init(){
+    if (Object.keys(this.state).length) return;
+    this.machines.forEach(m => this.state[m.id] = this.createInitialState(m));
+    this.alarms = [
+      { id:this.alarmId++, machine_id:'MW-DR02', severity:'warning', message:'High vibration detected', value:4.7, status:'active', raised_at:new Date(Date.now()-180000).toISOString(), machine_name:'Drilling Machine #02' },
+      { id:this.alarmId++, machine_id:'PW-PN00', severity:'critical', message:'Phase R voltage low', value:198, status:'active', raised_at:new Date(Date.now()-90000).toISOString(), machine_name:'Main Distribution Panel' }
+    ];
+  },
+
+  addMachine(m){ if (this.machines.find(x=>x.id === m.id)) throw new Error('Tag exists'); this.machines.push(m); this.state[m.id] = this.createInitialState(m); },
+  removeMachine(id){ this.machines = this.machines.filter(m => m.id !== id); delete this.state[id]; },
+
+  async handle(path, opts = {}){
+    await new Promise(r => setTimeout(r, 20));
+    const method = opts.method || 'GET';
+
+    if (path === '/machines'){
+      if (method === 'POST'){ const b = JSON.parse(opts.body); this.addMachine(b); return b; }
+      return this.machines;
+    }
+    if (path.startsWith('/machines/') && method === 'DELETE'){ this.removeMachine(path.split('/')[2]); return { ok:true }; }
+
+    if (path === '/telemetry/status/all'){
+      const out = [];
+      this.machines.forEach(m=>{
+        const s = this.state[m.id]; if (!s) return;
+        out.push({ machine_id:m.id, metric:'status', text_value:s.status, time:s.lastSeen });
+        ['rpm','temp','vibration','voltage','current','arc_status',
+         'voltage_r','voltage_s','voltage_t','current_r','current_s','current_t',
+         'power_kwh','humidity'].forEach(k=>{
+          if (s[k] !== undefined && s[k] !== null){
+            out.push({ machine_id:m.id, metric:k,
+              value: typeof s[k] === 'number' ? s[k] : null,
+              text_value: typeof s[k] === 'string' ? s[k] : null,
+              time:s.lastSeen });
+          }
+        });
+      });
+      return out;
+    }
+    if (path.startsWith('/telemetry/') && path.includes('?')){
+      const mid = path.match(/\/telemetry\/([^?]+)/)[1];
+      const metric = new URLSearchParams('?'+path.split('?')[1]).get('metric') || 'temp';
+      return this.getHistory(mid, metric);
+    }
+    if (path.startsWith('/alarms?')){
+      const st = new URLSearchParams('?'+path.split('?')[1]).get('status') || 'active';
+      return this.alarms.filter(a => a.status === st);
+    }
+    if (path.match(/^\/alarms\/\d+\/ack$/) && method === 'POST'){
+      if (!Auth.canOperate()) throw new Error('Forbidden');
+      const id = +path.split('/')[2];
+      const a = this.alarms.find(x=>x.id === id);
+      if (a){ a.status = 'acknowledged'; a.ack_at = new Date().toISOString(); }
+      return a || {};
+    }
+    if (path === '/alarms/rules') return [];
+    if (path === '/oee/summary/plant'){
+      return this.machines.filter(m => m.type !== 'Panel').map(m=>({
+        machine_id: m.id,
+        oee: 60 + Math.random()*35,
+        availability: 80 + Math.random()*19,
+        performance: 70 + Math.random()*28,
+        quality: 90 + Math.random()*9
+      }));
+    }
+    if (path.startsWith('/oee/')){
+      const id = path.match(/\/oee\/([^?]+)/)[1];
+      const days = [];
+      for (let i=6; i>=0; i--){
+        days.push({ bucket:new Date(Date.now()-i*86400000).toISOString(), machine_id:id,
+          avg_oee: 65+Math.random()*30, avg_availability: 82+Math.random()*15,
+          avg_performance: 72+Math.random()*25, avg_quality: 92+Math.random()*7 });
+      }
+      return days;
+    }
+    throw new Error('Demo: unknown path ' + path);
+  },
+
+  getHistory(machineId, metric){
+    const key = `${machineId}:${metric}`;
+    if (this.historyCache[key]) return this.historyCache[key];
+    const pts = [];
+    let base = 45, noise = 15;
+    if (metric === 'rpm'){ base = 1500; noise = 600; }
+    else if (metric === 'vibration'){ base = 2.5; noise = 2; }
+    else if (metric === 'voltage'){ base = 22; noise = 3; }
+    else if (metric === 'current'){ base = 120; noise = 30; }
+    else if (metric === 'voltage_r'){ base = 220.5; noise = 3; }
+    else if (metric === 'voltage_s'){ base = 219.8; noise = 3; }
+    else if (metric === 'voltage_t'){ base = 221.2; noise = 3; }
+    else if (metric === 'current_r'){ base = 55; noise = 8; }
+    else if (metric === 'current_s'){ base = 53; noise = 8; }
+    else if (metric === 'current_t'){ base = 57; noise = 8; }
+    else if (metric === 'humidity'){ base = 60; noise = 15; }
+    else if (metric === 'power_kwh'){ base = 1300; noise = 30; }
+
+    for (let i=199; i>=0; i--){
+      let v;
+      if (metric === 'power_kwh') v = base + (199-i)*0.4 + (Math.random()-0.5)*noise*0.3;
+      else v = base + (Math.random()-0.5)*noise;
+      pts.push({ bucket: new Date(Date.now()-i*5*60000).toISOString(), avg_value: v });
+    }
+    this.historyCache[key] = pts;
+    return pts;
+  },
+
+  startSimulator(){
+    if (this.simulated) return;
+    this.simulated = true;
+    setInterval(()=>{
+      this.machines.forEach(m=>{
+        const s = this.state[m.id];
+        if (!s) return;
+        s.lastSeen = new Date().toISOString();
+        const th = this.thresholds || Settings.get();
+
+        switch(m.type){
+          case 'Lathe': case 'Milling': case 'Drilling':
+            s.rpm = Math.max(0, Math.min(3500, s.rpm + (Math.random()-0.5)*80));
+            s.temp = Math.max(25, Math.min(95, s.temp + (Math.random()-0.5)*1.2));
+            s.vibration = Math.max(0.1, Math.min(8, s.vibration + (Math.random()-0.5)*0.15));
+            if (Math.random() < 0.01){
+              s.status = ['running','running','running','idle','error'][Math.floor(Math.random()*5)];
+              App.onTele({ machineId:m.id, metric:'status', textValue:s.status, time:s.lastSeen });
+            }
+            App.onTele({ machineId:m.id, metric:'rpm', value:s.rpm });
+            App.onTele({ machineId:m.id, metric:'temp', value:s.temp });
+            App.onTele({ machineId:m.id, metric:'vibration', value:s.vibration });
+            if (s.vibration > th.vibrationWarning && Math.random() < 0.01){
+              const a = { id:this.alarmId++, machine_id:m.id, severity: s.vibration > th.vibrationCritical ? 'critical':'warning',
+                message:`High vibration (${s.vibration.toFixed(2)} mm/s)`, value:s.vibration, status:'active',
+                raised_at:new Date().toISOString(), machine_name:m.name };
+              this.alarms.unshift(a); App.onAlarm(a);
+            }
+            break;
+
+          case 'Welding':
+            s.voltage = Math.max(15, Math.min(30, s.voltage + (Math.random()-0.5)*0.6));
+            s.current = Math.max(50, Math.min(180, s.current + (Math.random()-0.5)*6));
+            s.arc_status = Math.random() > 0.3 ? 'ON' : 'OFF';
+            App.onTele({ machineId:m.id, metric:'voltage', value:s.voltage });
+            App.onTele({ machineId:m.id, metric:'current', value:s.current });
+            App.onTele({ machineId:m.id, metric:'arc_status', textValue:s.arc_status });
+            break;
+
+          case 'Panel':
+            s.voltage_r = Math.max(200, Math.min(235, s.voltage_r + (Math.random()-0.5)*1.2));
+            s.voltage_s = Math.max(200, Math.min(235, s.voltage_s + (Math.random()-0.5)*1.2));
+            s.voltage_t = Math.max(200, Math.min(235, s.voltage_t + (Math.random()-0.5)*1.2));
+            s.current_r = Math.max(20, Math.min(120, s.current_r + (Math.random()-0.5)*2));
+            s.current_s = Math.max(20, Math.min(120, s.current_s + (Math.random()-0.5)*2));
+            s.current_t = Math.max(20, Math.min(120, s.current_t + (Math.random()-0.5)*2));
+            s.power_kwh += Math.random()*0.4;
+            ['voltage_r','voltage_s','voltage_t','current_r','current_s','current_t','power_kwh']
+              .forEach(k => App.onTele({ machineId:m.id, metric:k, value:s[k] }));
+            break;
+
+          case 'Environment':
+            s.temp = Math.max(20, Math.min(35, s.temp + (Math.random()-0.5)*0.25));
+            s.humidity = Math.max(40, Math.min(85, s.humidity + (Math.random()-0.5)*0.6));
+            App.onTele({ machineId:m.id, metric:'temp', value:s.temp });
+            App.onTele({ machineId:m.id, metric:'humidity', value:s.humidity });
+            break;
+        }
+      });
+      App.setLive(true);
+      const el = document.getElementById('tkOee');
+      if (el) el.textContent = (72 + Math.random()*18).toFixed(1)+'%';
+    }, 2000);
+  }
+};
+
+document.addEventListener('DOMContentLoaded', ()=> App.init());
+</script>
+</body>
+</html>
