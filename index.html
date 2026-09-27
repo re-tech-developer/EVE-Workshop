@@ -13,103 +13,77 @@
 
 <style>
 /* ============================================================
-   THEME TOKENS
+   THEME
 ============================================================ */
 :root{
-  --bg:        #0b0f14;
-  --surface:   #131820;
-  --surface-2: #1a2029;
-  --line:      #232c38;
-  --line-2:    #2e3947;
-  --ink:       #dde3ea;
-  --ink-2:     #8792a0;
-  --ink-3:     #5b6675;
-
-  --brand:     #4ea8de;
-  --ok:        #4ade80;
-  --warn:      #fbbf24;
-  --bad:       #f87171;
-  --maint:     #a78bfa;
-  --idle:      #fb923c;
-
-  --r: #ef4444;
-  --s: #eab308;
-  --t: #06b6d4;
-
-  --shadow: 0 1px 2px rgba(0,0,0,.3);
-  --radius: 6px;
+  --bg:#0b0f14; --surface:#131820; --surface-2:#1a2029;
+  --line:#232c38; --line-2:#2e3947;
+  --ink:#dde3ea; --ink-2:#8792a0; --ink-3:#5b6675;
+  --brand:#4ea8de; --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --maint:#a78bfa; --idle:#fb923c;
+  --r:#ef4444; --s:#eab308; --t:#06b6d4;
+  --eve-green:#8cc63f; --eve-black:#1a1a1a;
+  --radius:6px;
 }
 [data-theme="light"]{
-  --bg:        #f4f6f9;
-  --surface:   #ffffff;
-  --surface-2: #f0f3f7;
-  --line:      #e2e7ee;
-  --line-2:    #cbd3dd;
-  --ink:       #1a2432;
-  --ink-2:     #5a6779;
-  --ink-3:     #8892a0;
-
-  --brand:     #1d7bc4;
-  --ok:        #16a34a;
-  --warn:      #d97706;
-  --bad:       #dc2626;
-  --shadow: 0 1px 2px rgba(0,0,0,.05);
+  --bg:#f4f6f9; --surface:#ffffff; --surface-2:#f0f3f7;
+  --line:#e2e7ee; --line-2:#cbd3dd;
+  --ink:#1a2432; --ink-2:#5a6779; --ink-3:#8892a0;
+  --brand:#1d7bc4; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   background:var(--bg);color:var(--ink);font-size:13px;line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-  transition: background .2s, color .2s;
+  -webkit-font-smoothing:antialiased;transition:background .2s,color .2s;
 }
 .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
 button{font-family:inherit;cursor:pointer;}
+
+/* ============================================================
+   EVE LOGO
+============================================================ */
+.eve-logo{
+  display:flex;align-items:center;gap:6px;
+  font-weight:700;letter-spacing:1px;
+}
+.eve-logo svg{display:block;}
 
 /* ============================================================
    LOGIN
 ============================================================ */
 #loginView{
   min-height:100vh;display:grid;place-items:center;padding:20px;
-  background:
-    linear-gradient(180deg,var(--bg) 0%, var(--bg) 100%);
+  background:var(--bg);
 }
 .login-box{
-  width:100%;max-width:380px;background:var(--surface);
+  width:100%;max-width:390px;background:var(--surface);
   border:1px solid var(--line);border-radius:8px;
-  padding:32px 28px;box-shadow:var(--shadow);
+  padding:32px 28px;
 }
 .login-logo{
-  display:flex;align-items:center;gap:10px;margin-bottom:24px;
+  display:flex;flex-direction:column;align-items:center;
+  margin-bottom:26px;
 }
-.login-logo .mark{
-  width:34px;height:34px;border-radius:6px;
-  background:var(--brand);color:white;font-weight:700;font-size:15px;
-  display:grid;place-items:center;letter-spacing:-.5px;
-}
-.login-logo h1{font-size:14px;font-weight:600;letter-spacing:.3px;}
-.login-logo p{font-size:11px;color:var(--ink-3);margin-top:1px;}
+.login-logo svg{margin-bottom:10px;}
+.login-logo h1{font-size:16px;font-weight:600;letter-spacing:.5px;}
+.login-logo p{font-size:11px;color:var(--ink-3);margin-top:2px;}
 
 .field{margin-bottom:14px;}
-.field label{
-  display:block;font-size:11px;color:var(--ink-2);
-  font-weight:500;margin-bottom:6px;
-}
-.field input{
+.field label{display:block;font-size:11px;color:var(--ink-2);font-weight:500;margin-bottom:6px;}
+.field input, .field select{
   width:100%;padding:10px 12px;background:var(--bg);
   border:1px solid var(--line);border-radius:var(--radius);
   color:var(--ink);font-size:13px;font-family:inherit;
-  transition:border .15s;
 }
-.field input:focus{outline:none;border-color:var(--brand);}
+.field input:focus, .field select:focus{outline:none;border-color:var(--brand);}
 .field input:disabled{opacity:.6;cursor:not-allowed;}
 
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
   padding:9px 14px;font-size:12px;font-weight:500;
   border-radius:var(--radius);border:1px solid var(--line-2);
-  background:var(--surface-2);color:var(--ink);
-  transition:all .12s;
+  background:var(--surface-2);color:var(--ink);transition:all .12s;
 }
 .btn:hover{background:var(--surface);border-color:var(--ink-3);}
 .btn:active{transform:translateY(1px);}
@@ -133,30 +107,23 @@ button{font-family:inherit;cursor:pointer;}
 ============================================================ */
 .app{display:grid;grid-template-columns:210px 1fr;height:100vh;overflow:hidden;}
 
-/* Sidebar */
 .sidebar{
   background:var(--surface);border-right:1px solid var(--line);
   display:flex;flex-direction:column;overflow:hidden;
 }
 .brand{
-  padding:16px 16px 14px;border-bottom:1px solid var(--line);
+  padding:16px;border-bottom:1px solid var(--line);
   display:flex;align-items:center;gap:10px;
 }
-.brand .mark{
-  width:28px;height:28px;border-radius:5px;
-  background:var(--brand);color:#fff;
-  display:grid;place-items:center;font-weight:700;font-size:13px;
-}
-.brand .name{font-size:12px;font-weight:600;letter-spacing:.3px;}
-.brand .sub{font-size:10px;color:var(--ink-3);}
+.brand .info .name{font-size:12px;font-weight:600;}
+.brand .info .sub{font-size:10px;color:var(--ink-3);}
 
 .nav{flex:1;overflow-y:auto;padding:8px 0;}
 .nav-section{padding:10px 16px 4px;font-size:10px;font-weight:600;color:var(--ink-3);letter-spacing:.6px;text-transform:uppercase;}
 .nav-item{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 16px;color:var(--ink-2);font-size:12px;
-  background:none;border:none;width:100%;text-align:left;
-  border-left:2px solid transparent;transition:all .12s;
+  display:flex;align-items:center;gap:10px;padding:8px 16px;
+  color:var(--ink-2);font-size:12px;background:none;border:none;
+  width:100%;text-align:left;border-left:2px solid transparent;transition:all .12s;
 }
 .nav-item:hover{background:var(--surface-2);color:var(--ink);}
 .nav-item.active{color:var(--brand);border-left-color:var(--brand);background:var(--surface-2);}
@@ -174,15 +141,12 @@ button{font-family:inherit;cursor:pointer;}
 .sidebar-bottom .user{margin-bottom:8px;line-height:1.4;}
 .sidebar-bottom .user b{color:var(--ink);font-weight:600;}
 
-/* Main */
 .main{display:flex;flex-direction:column;overflow:hidden;height:100vh;}
 .topbar{
-  height:52px;flex-shrink:0;
-  background:var(--surface);border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;
+  height:52px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;padding:0 20px;
 }
-.topbar-title{font-size:13px;font-weight:600;letter-spacing:.2px;}
+.topbar-title{font-size:13px;font-weight:600;}
 .topbar-right{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--ink-2);}
 .topbar-right .icon-btn{
   width:30px;height:30px;border-radius:var(--radius);
@@ -211,7 +175,7 @@ button{font-family:inherit;cursor:pointer;}
 #view.no-scroll{overflow:hidden;}
 
 /* ============================================================
-   LAYOUT UTILS
+   LAYOUT
 ============================================================ */
 .page{padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
@@ -219,7 +183,6 @@ button{font-family:inherit;cursor:pointer;}
 .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
 .grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
 
-/* Cards */
 .card{
   background:var(--surface);border:1px solid var(--line);
   border-radius:var(--radius);padding:14px;
@@ -227,19 +190,18 @@ button{font-family:inherit;cursor:pointer;}
 .card-head{
   display:flex;align-items:center;justify-content:space-between;
   margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line);
+  gap:8px;flex-wrap:wrap;
 }
 .card-title{
   font-size:11px;font-weight:600;color:var(--ink-2);
   letter-spacing:.4px;text-transform:uppercase;
 }
 
-/* KPI */
 .kpi-label{font-size:10px;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;}
 .kpi-value{font-size:26px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;}
 .kpi-value.sm{font-size:20px;}
 .kpi-note{font-size:10px;color:var(--ink-3);margin-top:4px;}
 
-/* Status dot */
 .led{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
 .led.running{background:var(--ok);}
 .led.idle{background:var(--idle);}
@@ -247,43 +209,33 @@ button{font-family:inherit;cursor:pointer;}
 .led.maintenance{background:var(--maint);}
 .led.offline{background:var(--ink-3);}
 
-/* Area cards */
 .area-card{
   background:var(--surface);border:1px solid var(--line);
   border-radius:var(--radius);padding:14px;cursor:pointer;
-  transition:border-color .15s,background .15s;
-  position:relative;
+  transition:border-color .15s,background .15s;position:relative;
 }
 .area-card:hover{border-color:var(--line-2);background:var(--surface-2);}
 .area-card .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .area-card .head .name{font-size:13px;font-weight:600;}
-.area-card .head .count{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums;}
+.area-card .head .count{font-size:11px;color:var(--ink-3);}
 .area-card .stats{display:flex;gap:14px;font-size:11px;color:var(--ink-2);}
 .area-card .stats .s{display:flex;align-items:center;gap:5px;}
-.area-card .accent-bar{
-  position:absolute;left:0;top:14px;bottom:14px;width:2px;border-radius:2px;
-}
+.area-card .accent-bar{position:absolute;left:0;top:14px;bottom:14px;width:2px;border-radius:2px;}
 
-/* Machine cards */
 .machine-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));}
 .machine-card{
   background:var(--surface);border:1px solid var(--line);
   border-radius:var(--radius);padding:12px;cursor:pointer;
   transition:border-color .15s,background .15s;
-  position:relative;
 }
 .machine-card:hover{border-color:var(--line-2);background:var(--surface-2);}
 .machine-card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;}
-.machine-card .name{
-  font-size:12px;font-weight:600;display:flex;align-items:center;gap:7px;
-  min-width:0;
-}
+.machine-card .name{font-size:12px;font-weight:600;display:flex;align-items:center;gap:7px;min-width:0;}
 .machine-card .name span.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .machine-card .loc{font-size:10px;color:var(--ink-3);margin-top:2px;}
 .machine-card .tag{
-  font-family:'IBM Plex Mono',monospace;font-size:10px;
-  color:var(--ink-3);padding:2px 6px;
-  background:var(--bg);border-radius:3px;flex-shrink:0;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-3);
+  padding:2px 6px;background:var(--bg);border-radius:3px;flex-shrink:0;
   border:1px solid var(--line);
 }
 .machine-card .foot{
@@ -292,28 +244,19 @@ button{font-family:inherit;cursor:pointer;}
   font-size:10px;color:var(--ink-3);
 }
 
-/* Metrics in card */
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .metrics.c3{grid-template-columns:repeat(3,1fr);}
-.metric{
-  background:var(--bg);border:1px solid var(--line);
-  border-radius:4px;padding:7px 9px;
-}
+.metric{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;}
 .metric .l{font-size:9px;color:var(--ink-3);letter-spacing:.4px;text-transform:uppercase;}
 .metric .v{font-size:14px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;}
 .metric .v .unit{font-size:10px;color:var(--ink-3);font-weight:400;margin-left:2px;}
 
-/* 3-Phase widget */
 .phase-group{margin-top:8px;}
-.phase-group .lbl{
-  font-size:9px;color:var(--ink-3);letter-spacing:.5px;
-  text-transform:uppercase;margin-bottom:5px;
-}
+.phase-group .lbl{font-size:9px;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;}
 .phase-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
 .phase-box{
   background:var(--bg);border:1px solid var(--line);
-  border-radius:4px;padding:6px 8px;position:relative;
-  border-left-width:2px;
+  border-radius:4px;padding:6px 8px;border-left-width:2px;
 }
 .phase-box[data-p="R"]{border-left-color:var(--r);}
 .phase-box[data-p="S"]{border-left-color:var(--s);}
@@ -321,7 +264,6 @@ button{font-family:inherit;cursor:pointer;}
 .phase-box .p{font-size:9px;color:var(--ink-3);letter-spacing:.5px;}
 .phase-box .v{font-size:13px;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums;}
 
-/* kWh bar */
 .kwh-bar{
   margin-top:8px;padding:7px 10px;background:var(--bg);
   border:1px solid var(--line);border-radius:4px;
@@ -330,27 +272,15 @@ button{font-family:inherit;cursor:pointer;}
 .kwh-bar .l{font-size:9px;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase;}
 .kwh-bar .v{font-size:13px;font-weight:600;color:var(--warn);font-variant-numeric:tabular-nums;}
 
-/* Environment */
 .env-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
-.env-box{
-  background:var(--bg);border:1px solid var(--line);
-  border-radius:4px;padding:10px;text-align:center;
-}
+.env-box{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px;text-align:center;}
 .env-box .icon{font-size:16px;margin-bottom:2px;}
 .env-box .l{font-size:9px;color:var(--ink-3);letter-spacing:.4px;text-transform:uppercase;}
 .env-box .v{font-size:18px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;}
 
-/* Alarm */
-.alarm{
-  display:flex;gap:10px;padding:9px 12px;
-  border-bottom:1px solid var(--line);font-size:11px;
-  align-items:flex-start;
-}
+.alarm{display:flex;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:11px;align-items:flex-start;}
 .alarm:last-child{border-bottom:none;}
-.alarm .sev{
-  font-size:9px;font-weight:600;text-transform:uppercase;
-  padding:2px 6px;border-radius:3px;letter-spacing:.3px;flex-shrink:0;
-}
+.alarm .sev{font-size:9px;font-weight:600;text-transform:uppercase;padding:2px 6px;border-radius:3px;flex-shrink:0;}
 .alarm[data-sev="critical"] .sev{background:rgba(248,113,113,.15);color:var(--bad);}
 .alarm[data-sev="warning"] .sev{background:rgba(251,191,36,.15);color:var(--warn);}
 .alarm[data-sev="info"] .sev{background:rgba(78,168,222,.15);color:var(--brand);}
@@ -359,32 +289,20 @@ button{font-family:inherit;cursor:pointer;}
 .alarm .body .m{color:var(--ink-2);font-size:10px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .alarm .time{font-size:10px;color:var(--ink-3);flex-shrink:0;}
 
-/* Table */
 .table-wrap{overflow-x:auto;margin:-14px;padding:0 14px;}
 table.data{width:100%;border-collapse:collapse;font-size:12px;}
-table.data th{
-  text-align:left;padding:9px 10px;
-  font-size:10px;color:var(--ink-3);font-weight:600;
-  letter-spacing:.4px;text-transform:uppercase;
-  border-bottom:1px solid var(--line);white-space:nowrap;
-}
-table.data td{
-  padding:10px;border-bottom:1px solid var(--line);
-  font-variant-numeric:tabular-nums;vertical-align:middle;
-}
+table.data th{text-align:left;padding:9px 10px;font-size:10px;color:var(--ink-3);font-weight:600;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--line);white-space:nowrap;}
+table.data td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle;font-variant-numeric:tabular-nums;}
 table.data tr:hover td{background:var(--surface-2);}
 
-/* Chart */
 .chart-box{position:relative;height:220px;}
 .chart-box.sm{height:170px;}
 
-/* Phase toggle buttons */
 .phase-toggles{display:flex;gap:4px;}
 .phase-btn{
   padding:4px 10px;font-size:11px;font-weight:500;
   background:var(--bg);border:1px solid var(--line);
-  color:var(--ink-2);border-radius:4px;
-  transition:all .12s;
+  color:var(--ink-2);border-radius:4px;transition:all .12s;
 }
 .phase-btn:hover{color:var(--ink);border-color:var(--line-2);}
 .phase-btn.active{background:var(--brand);border-color:var(--brand);color:#fff;}
@@ -392,36 +310,26 @@ table.data tr:hover td{background:var(--surface-2);}
 .phase-btn[data-p="S"].active{background:var(--s);border-color:var(--s);color:#111;}
 .phase-btn[data-p="T"].active{background:var(--t);border-color:var(--t);color:#fff;}
 
-/* Modal */
-.modal-back{
-  position:fixed;inset:0;background:rgba(0,0,0,.5);
-  display:grid;place-items:center;z-index:100;padding:16px;
-  backdrop-filter:blur(2px);
+/* Range selector */
+.range-sel{display:flex;gap:4px;flex-wrap:wrap;}
+.range-btn{
+  padding:4px 10px;font-size:11px;
+  background:var(--bg);border:1px solid var(--line);
+  color:var(--ink-2);border-radius:4px;transition:all .12s;
 }
-.modal{
-  background:var(--surface);border:1px solid var(--line);
-  border-radius:8px;width:100%;max-width:480px;
-  max-height:90vh;overflow:hidden;display:flex;flex-direction:column;
-  box-shadow:0 20px 50px rgba(0,0,0,.4);
-}
-.modal-head{
-  padding:14px 18px;border-bottom:1px solid var(--line);
-  display:flex;justify-content:space-between;align-items:center;
-}
+.range-btn:hover{color:var(--ink);border-color:var(--line-2);}
+.range-btn.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:100;padding:16px;}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:8px;width:100%;max-width:480px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;}
+.modal-head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
 .modal-head h3{font-size:13px;font-weight:600;}
 .modal-body{padding:18px;overflow-y:auto;}
-.modal-foot{
-  padding:12px 18px;border-top:1px solid var(--line);
-  display:flex;justify-content:flex-end;gap:8px;
-}
+.modal-foot{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;}
 
-/* Empty */
-.empty{
-  padding:32px 20px;text-align:center;color:var(--ink-3);font-size:12px;
-}
+.empty{padding:32px 20px;text-align:center;color:var(--ink-3);font-size:12px;}
 .empty .icon{font-size:24px;margin-bottom:8px;opacity:.4;}
 
-/* Text colors */
 .t-ok{color:var(--ok);}
 .t-warn{color:var(--warn);}
 .t-bad{color:var(--bad);}
@@ -429,42 +337,24 @@ table.data tr:hover td{background:var(--surface-2);}
 .t-muted{color:var(--ink-3);}
 .t-dim{color:var(--ink-2);}
 
-/* Scroll */
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--ink-3);}
 
-/* ============================================================
-   MOBILE
-============================================================ */
-.mobile-only{display:none;}
-
-@media (max-width: 900px){
+/* Mobile */
+@media (max-width:900px){
   .app{grid-template-columns:1fr;}
   .sidebar{
-    position:fixed;bottom:0;left:0;right:0;
-    width:100%;height:auto;border-right:none;
-    border-top:1px solid var(--line);
-    flex-direction:row;z-index:50;
+    position:fixed;bottom:0;left:0;right:0;width:100%;height:auto;
+    border-right:none;border-top:1px solid var(--line);flex-direction:row;z-index:50;
     padding-bottom:env(safe-area-inset-bottom,0);
   }
   .sidebar .brand, .sidebar .nav-section, .sidebar-bottom{display:none;}
-  .nav{
-    display:flex;flex-direction:row;justify-content:space-around;
-    padding:6px 4px;width:100%;overflow-x:auto;scrollbar-width:none;
-  }
+  .nav{display:flex;flex-direction:row;justify-content:space-around;padding:6px 4px;width:100%;overflow-x:auto;scrollbar-width:none;}
   .nav::-webkit-scrollbar{display:none;}
-  .nav-item{
-    flex-direction:column;gap:3px;padding:6px 8px;
-    border-left:none;border-bottom:2px solid transparent;
-    font-size:10px;min-width:64px;text-align:center;
-    border-radius:4px;
-  }
-  .nav-item.active{
-    border-left:none;border-bottom-color:var(--brand);
-    background:transparent;
-  }
+  .nav-item{flex-direction:column;gap:3px;padding:6px 8px;border-left:none;border-bottom:2px solid transparent;font-size:10px;min-width:64px;text-align:center;border-radius:4px;}
+  .nav-item.active{border-left:none;border-bottom-color:var(--brand);background:transparent;}
   .nav-item .ico{width:18px;height:18px;}
   .nav-item .count{display:none;}
 
@@ -474,46 +364,21 @@ table.data tr:hover td{background:var(--surface-2);}
   .topbar-right{gap:10px;font-size:10px;}
   .topbar-right .icon-btn{width:28px;height:28px;}
   .ticker{padding:6px 14px;gap:16px;font-size:10px;}
-
   .page{padding:12px 14px;gap:10px;}
-
   .grid-4, .grid-3, .grid-2, .grid-2-1{grid-template-columns:1fr;gap:10px;}
-
   .kpi-value{font-size:22px;}
   .kpi-value.sm{font-size:18px;}
-
   .machine-grid{grid-template-columns:1fr;}
-
   .chart-box{height:200px;}
   .chart-box.sm{height:160px;}
-
-  /* Mobile: compact KPI row 2-col */
   .grid-4.mobile-2col{grid-template-columns:1fr 1fr;}
-  .grid-4.mobile-2col .card{padding:11px;}
   .grid-4.mobile-2col .kpi-value{font-size:20px;}
-
-  /* Mobile: area card compact */
-  .area-card{padding:12px;}
-  .area-card .head .name{font-size:12px;}
-
-  .phase-btn{padding:4px 8px;font-size:10px;}
-
-  /* Table font smaller */
   table.data{font-size:11px;}
-  table.data th{padding:8px;}
-  table.data td{padding:8px;}
+  table.data th, table.data td{padding:8px;}
 }
-
-@media (max-width: 380px){
+@media (max-width:380px){
   .kpi-value{font-size:20px;}
   .grid-4.mobile-2col .kpi-value{font-size:18px;}
-  .metric .v{font-size:13px;}
-}
-
-/* Print */
-@media print{
-  .sidebar, .topbar, .ticker{display:none !important;}
-  .main{padding-bottom:0 !important;}
 }
 </style>
 </head>
@@ -525,11 +390,15 @@ table.data tr:hover td{background:var(--surface-2);}
 <div id="loginView">
   <div class="login-box">
     <div class="login-logo">
-      <div class="mark">E</div>
-      <div>
-        <h1>EVE Workshop</h1>
-        <p>Industrial Monitoring</p>
-      </div>
+      <svg width="180" height="60" viewBox="0 0 180 60">
+        <circle cx="30" cy="30" r="22" fill="#8cc63f" stroke="#1a1a1a" stroke-width="2.5"/>
+        <line x1="12" y1="30" x2="42" y2="30" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+        <path d="M 68 12 L 82 48 L 96 12 L 104 12 L 88 52 L 76 52 L 60 12 Z" fill="#8cc63f" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="148" cy="30" r="22" fill="#8cc63f" stroke="#1a1a1a" stroke-width="2.5"/>
+        <line x1="130" y1="30" x2="160" y2="30" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <h1>EVE Workshop</h1>
+      <p>Enterprise-based Vocational Education</p>
     </div>
 
     <form id="loginForm">
@@ -564,8 +433,13 @@ table.data tr:hover td{background:var(--surface-2);}
 <div id="app" class="app" style="display:none;">
   <aside class="sidebar">
     <div class="brand">
-      <div class="mark">E</div>
-      <div>
+      <svg width="34" height="34" viewBox="0 0 60 60">
+        <circle cx="18" cy="30" r="14" fill="#8cc63f" stroke="#1a1a1a" stroke-width="2"/>
+        <line x1="7" y1="30" x2="29" y2="30" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 32 16 L 39 44 L 46 16 L 50 16 L 42 48 L 36 48 L 28 16 Z" fill="#8cc63f" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="52" cy="30" r="8" fill="#8cc63f" stroke="#1a1a1a" stroke-width="1.5"/>
+      </svg>
+      <div class="info">
         <div class="name">EVE Workshop</div>
         <div class="sub">Monitoring</div>
       </div>
@@ -580,25 +454,11 @@ table.data tr:hover td{background:var(--surface-2);}
         <span>Alarms</span>
         <span class="count" id="navAlarmCount" style="display:none;">0</span>
       </button>
-
       <div class="nav-section">Areas</div>
-      <button class="nav-item" data-route="area" data-area="Machining">
-        <span class="dot" style="background:var(--brand);"></span>
-        <span>Machining</span>
-      </button>
-      <button class="nav-item" data-route="area" data-area="Welding">
-        <span class="dot" style="background:var(--idle);"></span>
-        <span>Welding</span>
-      </button>
-      <button class="nav-item" data-route="area" data-area="Power">
-        <span class="dot" style="background:var(--warn);"></span>
-        <span>Power</span>
-      </button>
-      <button class="nav-item" data-route="area" data-area="Facility">
-        <span class="dot" style="background:var(--ok);"></span>
-        <span>Facility</span>
-      </button>
-
+      <button class="nav-item" data-route="area" data-area="Machining"><span class="dot" style="background:var(--brand);"></span><span>Machining</span></button>
+      <button class="nav-item" data-route="area" data-area="Welding"><span class="dot" style="background:var(--idle);"></span><span>Welding</span></button>
+      <button class="nav-item" data-route="area" data-area="Power"><span class="dot" style="background:var(--warn);"></span><span>Power</span></button>
+      <button class="nav-item" data-route="area" data-area="Facility"><span class="dot" style="background:var(--ok);"></span><span>Facility</span></button>
       <div class="nav-section">System</div>
       <button class="nav-item" data-route="reports">
         <svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>
@@ -626,9 +486,7 @@ table.data tr:hover td{background:var(--surface-2);}
         <button class="icon-btn" onclick="Theme.toggle()" title="Toggle theme">
           <svg id="themeIcon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         </button>
-        <span class="status-live" id="liveIndicator">
-          <span class="led"></span> <span>Connecting</span>
-        </span>
+        <span class="status-live" id="liveIndicator"><span class="led"></span> <span>Connecting</span></span>
         <span class="mono" id="clock" style="font-size:11px;">—</span>
       </div>
     </header>
@@ -663,11 +521,7 @@ const CONFIG = {
    THEME
 ============================================================ */
 const Theme = {
-  init(){
-    const saved = localStorage.getItem('eve_theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', saved);
-    this.updateIcon();
-  },
+  init(){ const s = localStorage.getItem('eve_theme') || 'dark'; document.documentElement.setAttribute('data-theme', s); this.updateIcon(); },
   toggle(){
     const cur = document.documentElement.getAttribute('data-theme') || 'dark';
     const next = cur === 'dark' ? 'light' : 'dark';
@@ -679,13 +533,10 @@ const Theme = {
   },
   updateIcon(){
     const cur = document.documentElement.getAttribute('data-theme') || 'dark';
-    const icon = document.getElementById('themeIcon');
-    if (!icon) return;
-    if (cur === 'dark'){
-      icon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
-    } else {
-      icon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
-    }
+    const i = document.getElementById('themeIcon'); if (!i) return;
+    i.innerHTML = cur === 'dark'
+      ? '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>'
+      : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
   },
   grid(){ return document.documentElement.getAttribute('data-theme') === 'light' ? '#e5e9f0' : '#1c2530'; },
   text(){ return document.documentElement.getAttribute('data-theme') === 'light' ? '#5a6779' : '#8792a0'; }
@@ -703,12 +554,9 @@ const Auth = {
   canOperate(){ return ['admin','operator','engineer'].includes(this.user?.role); }
 };
 
-/* ============================================================
-   SETTINGS
-============================================================ */
 const Settings = {
   defaults: { tempWarning:75, tempCritical:90, vibrationWarning:4.5, vibrationCritical:7, voltageMin:200, humidityWarning:70, shiftStart:'08:00', shiftEnd:'16:00' },
-  get(){ try { const s = localStorage.getItem('eve_settings'); return s ? {...this.defaults, ...JSON.parse(s)} : {...this.defaults}; } catch { return {...this.defaults}; } },
+  get(){ try { const s = localStorage.getItem('eve_settings'); return s ? {...this.defaults,...JSON.parse(s)} : {...this.defaults}; } catch { return {...this.defaults}; } },
   save(o){ localStorage.setItem('eve_settings', JSON.stringify(o)); },
   reset(){ localStorage.removeItem('eve_settings'); }
 };
@@ -718,8 +566,7 @@ const Settings = {
 ============================================================ */
 const State = {
   machines: [], live: {}, alarms: [], oee: [],
-  currentRoute: 'dashboard', currentArea: null,
-  socket: null, clockTimer: null
+  currentRoute: 'dashboard', socket: null, clockTimer: null
 };
 
 /* ============================================================
@@ -728,6 +575,12 @@ const State = {
 const fmtN = (v,d=1)=>{ if(v===null||v===undefined||isNaN(v)) return '—'; return Number(v).toFixed(d); };
 const fmtT = ts => new Date(ts).toLocaleTimeString('id-ID',{hour12:false});
 const fmtD = ts => new Date(ts).toLocaleString('id-ID',{hour12:false});
+// Format tanggal Indonesia untuk Excel (dengan format "DD MMM YYYY HH:mm:ss")
+const fmtDExcel = ts => {
+  const d = new Date(ts);
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+  return `${String(d.getDate()).padStart(2,'0')} ${months[d.getMonth()]} ${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+};
 const ago = ts => {
   const s = Math.floor((Date.now()-new Date(ts))/1000);
   if(s<60) return s+'s'; if(s<3600) return Math.floor(s/60)+'m';
@@ -735,8 +588,111 @@ const ago = ts => {
 };
 const statusCls = s => ({running:'t-ok',idle:'t-warn',error:'t-bad',maintenance:'t-brand',offline:'t-muted'}[s] || 't-muted');
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const beep = ()=>{ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.frequency.value=880; o.connect(g); g.connect(ctx.destination); g.gain.setValueAtTime(.08,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.3); o.start(); o.stop(ctx.currentTime+.3); }catch{} };
-const dl = (c,f,m)=>{ const b=new Blob([c],{type:m}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=f; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); };
+const beep = ()=>{ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(); const g=c.createGain(); o.frequency.value=880; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(.08,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.3); o.start(); o.stop(c.currentTime+.3); }catch{} };
+
+/* ============================================================
+   CSV / EXPORT HELPERS
+   - Delimiter ; (koma untuk Excel Indonesia)
+   - BOM UTF-8
+   - Format tanggal Indonesia
+============================================================ */
+function csvEscape(v){
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  if (s.includes(';') || s.includes('"') || s.includes('\n') || s.includes('\r')){
+    return '"' + s.replace(/"/g,'""') + '"';
+  }
+  return s;
+}
+function buildCSV(rows){
+  return '\ufeff' + rows.map(r => r.map(csvEscape).join(';')).join('\r\n');
+}
+function downloadCSV(rows, filename){
+  const csv = buildCSV(rows);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   PDF HELPERS (dengan logo EVE)
+============================================================ */
+function drawEveLogoPDF(doc, x, y, size = 12){
+  // Logo EVE sederhana untuk PDF (vektor)
+  const g = '#8cc63f', b = '#1a1a1a';
+  const r = size * 0.45;
+
+  // E
+  doc.setFillColor(140, 198, 63);
+  doc.setDrawColor(26, 26, 26);
+  doc.setLineWidth(0.4);
+  doc.circle(x, y, r, 'FD');
+  doc.setDrawColor(26, 26, 26);
+  doc.setLineWidth(0.6);
+  doc.line(x - r*0.7, y, x + r*0.7, y);
+
+  // V
+  const vx = x + size * 0.9;
+  doc.setFillColor(140, 198, 63);
+  doc.setDrawColor(26, 26, 26);
+  doc.setLineWidth(0.5);
+  doc.triangle(vx - r*0.6, y - r*0.9, vx + r*0.6, y - r*0.9, vx, y + r*0.9, 'FD');
+  doc.setFillColor(255,255,255);
+  doc.triangle(vx - r*0.25, y - r*0.5, vx + r*0.25, y - r*0.5, vx, y + r*0.3, 'F');
+
+  // E
+  const ex = x + size * 1.8;
+  doc.setFillColor(140, 198, 63);
+  doc.setDrawColor(26, 26, 26);
+  doc.setLineWidth(0.4);
+  doc.circle(ex, y, r, 'FD');
+  doc.line(ex - r*0.7, y, ex + r*0.7, y);
+}
+function addPDFHeader(doc, title, subtitle){
+  // Bar atas
+  doc.setFillColor(19, 24, 32);
+  doc.rect(0, 0, doc.internal.pageSize.getWidth(), 22, 'F');
+
+  // Logo EVE
+  drawEveLogoPDF(doc, 14, 11, 8);
+
+  // Title
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'bold');
+  doc.text('EVE WORKSHOP', 48, 10);
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(140, 198, 63);
+  doc.text(subtitle, 48, 15);
+
+  // Info kanan
+  doc.setTextColor(220, 220, 220);
+  doc.setFontSize(8);
+  const w = doc.internal.pageSize.getWidth();
+  doc.text(`Generated: ${fmtDExcel(new Date())}`, w - 14, 11, { align: 'right' });
+  doc.text(`Report: ${title}`, w - 14, 15, { align: 'right' });
+
+  return 26; // start Y
+}
+function addPDFFooter(doc){
+  const pageCount = doc.internal.getNumberOfPages();
+  const w = doc.internal.pageSize.getWidth();
+  const h = doc.internal.pageSize.getHeight();
+  for (let i = 1; i <= pageCount; i++){
+    doc.setPage(i);
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.2);
+    doc.line(14, h - 10, w - 14, h - 10);
+    doc.setFontSize(7);
+    doc.setTextColor(140, 140, 140);
+    doc.text('EVE Workshop · Enterprise-based Vocational Education', 14, h - 6);
+    doc.text(`Page ${i} of ${pageCount}`, w - 14, h - 6, { align: 'right' });
+  }
+}
 
 /* ============================================================
    API
@@ -753,23 +709,55 @@ async function api(path, opts={}){
 }
 
 /* ============================================================
+   METRIC MAP (per equipment type)
+============================================================ */
+const METRICS_BY_TYPE = {
+  Lathe: [
+    { key:'temp',      label:'Suhu',      unit:'°C',    color:'#f87171', decimals:1 },
+    { key:'rpm',       label:'RPM',       unit:'',      color:'#4ea8de', decimals:0 },
+    { key:'vibration', label:'Vibrasi',   unit:'mm/s',  color:'#a78bfa', decimals:2 }
+  ],
+  Milling: [
+    { key:'temp',      label:'Suhu',      unit:'°C',    color:'#f87171', decimals:1 },
+    { key:'rpm',       label:'RPM',       unit:'',      color:'#4ea8de', decimals:0 },
+    { key:'vibration', label:'Vibrasi',   unit:'mm/s',  color:'#a78bfa', decimals:2 }
+  ],
+  Drilling: [
+    { key:'temp',      label:'Suhu',      unit:'°C',    color:'#f87171', decimals:1 },
+    { key:'rpm',       label:'RPM',       unit:'',      color:'#4ea8de', decimals:0 },
+    { key:'vibration', label:'Vibrasi',   unit:'mm/s',  color:'#a78bfa', decimals:2 }
+  ],
+  Welding: [
+    { key:'voltage',   label:'Voltage',   unit:'V',     color:'#fb923c', decimals:1 },
+    { key:'current',   label:'Current',   unit:'A',     color:'#fbbf24', decimals:1 }
+  ],
+  Panel: [
+    { key:'voltage_r', label:'Voltage R', unit:'V',     color:'#ef4444', decimals:1, phase:'R' },
+    { key:'voltage_s', label:'Voltage S', unit:'V',     color:'#eab308', decimals:1, phase:'S' },
+    { key:'voltage_t', label:'Voltage T', unit:'V',     color:'#06b6d4', decimals:1, phase:'T' },
+    { key:'current_r', label:'Current R', unit:'A',     color:'#ef4444', decimals:2, phase:'R' },
+    { key:'current_s', label:'Current S', unit:'A',     color:'#eab308', decimals:2, phase:'S' },
+    { key:'current_t', label:'Current T', unit:'A',     color:'#06b6d4', decimals:2, phase:'T' },
+    { key:'power_kwh', label:'Energy',    unit:'kWh',   color:'#fbbf24', decimals:2 }
+  ],
+  Environment: [
+    { key:'temp',      label:'Suhu',      unit:'°C',    color:'#f87171', decimals:1 },
+    { key:'humidity',  label:'Humidity',  unit:'%',     color:'#06b6d4', decimals:1 }
+  ]
+};
+
+/* ============================================================
    AREA MAP
 ============================================================ */
 const AREA_MAP = {
-  Machining: { title:'Machining', sub:'Lathe · Milling · Drilling', sections:[
-    { name:'Lathe',     filter:m=>m.type==='Lathe' },
-    { name:'Milling',   filter:m=>m.type==='Milling' },
-    { name:'Drilling',  filter:m=>m.type==='Drilling' }
+  Machining: { title:'Machining', sections:[
+    { name:'Lathe',    filter:m=>m.type==='Lathe' },
+    { name:'Milling',  filter:m=>m.type==='Milling' },
+    { name:'Drilling', filter:m=>m.type==='Drilling' }
   ]},
-  Welding: { title:'Welding', sub:'Arc Welding Stations', sections:[
-    { name:'Welding Machines', filter:m=>m.type==='Welding' }
-  ]},
-  Power: { title:'Power', sub:'Distribution Panels', sections:[
-    { name:'Electrical Panels', filter:m=>m.type==='Panel' }
-  ]},
-  Facility: { title:'Facility', sub:'Room Environment', sections:[
-    { name:'Environment Sensors', filter:m=>m.type==='Environment' }
-  ]}
+  Welding:  { title:'Welding',  sections:[{ name:'Welding Machines', filter:m=>m.type==='Welding' }]},
+  Power:    { title:'Power',    sections:[{ name:'Electrical Panels', filter:m=>m.type==='Panel' }]},
+  Facility: { title:'Facility', sections:[{ name:'Environment Sensors', filter:m=>m.type==='Environment' }]}
 };
 
 /* ============================================================
@@ -782,28 +770,21 @@ const App = {
     this.bindLogin();
     this.bindNav();
     window.addEventListener('hashchange', ()=>this.route());
-
     if (Auth.token){
       if (Auth.token.startsWith('demo-')) CONFIG.DEMO_MODE = true;
       this.showApp();
-    } else {
-      this.showLogin();
-    }
+    } else this.showLogin();
   },
-
   clock(){
     const t = ()=>{ const e = document.getElementById('clock'); if(e) e.textContent = new Date().toLocaleString('id-ID',{hour12:false}); };
-    t();
-    if (State.clockTimer) clearInterval(State.clockTimer);
+    t(); if (State.clockTimer) clearInterval(State.clockTimer);
     State.clockTimer = setInterval(t, 1000);
   },
-
   bindLogin(){
     document.getElementById('loginForm').addEventListener('submit', async (e)=>{
       e.preventDefault();
       const err = document.getElementById('loginErr');
-      err.style.color = 'var(--ink-2)';
-      err.textContent = 'Menghubungi server...';
+      err.style.color = 'var(--ink-2)'; err.textContent = 'Menghubungi server...';
       const fd = new FormData(e.target);
       const ctrl = new AbortController();
       const tid = setTimeout(()=>ctrl.abort(), 5000);
@@ -816,8 +797,7 @@ const App = {
         clearTimeout(tid);
         if (!res.ok) throw new Error(`Gagal (${res.status})`);
         const { token, user } = await res.json();
-        Auth.set(token, user);
-        err.textContent = '';
+        Auth.set(token, user); err.textContent = '';
         this.showApp();
       } catch (ex){
         clearTimeout(tid);
@@ -825,66 +805,49 @@ const App = {
         err.textContent = ex.name === 'AbortError' ? 'Server tidak merespons. Pakai tombol Demo.' : `⚠ ${ex.message} — pakai tombol Demo.`;
       }
     });
-
     document.querySelectorAll('[data-demo]').forEach(b=>{
       b.addEventListener('click', ()=>{
         const role = b.dataset.demo;
         CONFIG.DEMO_MODE = true;
-        Auth.set('demo-'+role, {
-          id: role==='admin'?1:2, username:role,
-          name: role==='admin'?'Administrator':'Viewer',
-          role: role
-        });
+        Auth.set('demo-'+role, { id: role==='admin'?1:2, username:role, name: role==='admin'?'Administrator':'Viewer', role: role });
         this.showApp();
       });
     });
   },
-
   bindNav(){
     document.querySelectorAll('[data-route]').forEach(b=>{
       b.addEventListener('click', ()=>{
-        const route = b.dataset.route;
-        const area = b.dataset.area;
-        location.hash = (route === 'area' && area) ? `area/${area}` : route;
+        const r = b.dataset.route, a = b.dataset.area;
+        location.hash = (r === 'area' && a) ? `area/${a}` : r;
       });
     });
   },
-
   logout(){
     Auth.clear();
     if (State.socket){ try{State.socket.disconnect();}catch{} State.socket = null; }
-    CONFIG.DEMO_MODE = false;
-    DemoAPI.simulated = false;
-    location.hash = '';
-    this.showLogin();
+    CONFIG.DEMO_MODE = false; DemoAPI.simulated = false;
+    location.hash = ''; this.showLogin();
   },
-
   showLogin(){
     document.getElementById('app').style.display = 'none';
     document.getElementById('loginView').style.display = 'grid';
     this.clock();
   },
-
   async showApp(){
     document.getElementById('loginView').style.display = 'none';
     document.getElementById('app').style.display = 'grid';
-
     const u = Auth.user;
     document.getElementById('userInfo').innerHTML = `<b>${esc(u?.name || u?.username)}</b><br><span class="t-muted">${(u?.role||'').toUpperCase()}</span>`;
     document.getElementById('tkMode').textContent = CONFIG.DEMO_MODE ? 'DEMO' : 'LIVE';
-
     if (!Auth.isAdmin()) document.getElementById('navAdmin').style.display = 'none';
-
     if (CONFIG.DEMO_MODE) DemoAPI.init();
     if (!location.hash) location.hash = '#dashboard';
-
     await this.loadAll();
     this.route();
     this.realtime();
     setInterval(()=>this.loadAlarms(), 15000);
     setInterval(()=>this.loadOee(), 30000);
   },
-
   async loadAll(){
     try {
       State.machines = await api('/machines');
@@ -898,18 +861,12 @@ const App = {
       await this.loadAlarms();
       await this.loadOee();
       document.getElementById('tkAssets').textContent = State.machines.length;
-      this.navBadge();
-      this.ticker();
+      this.navBadge(); this.ticker();
     } catch(e){ console.error(e); }
   },
-
   async loadAlarms(){
-    try {
-      State.alarms = await api('/alarms?status=active&limit=50');
-      this.navBadge(); this.ticker();
-    } catch(e){}
+    try { State.alarms = await api('/alarms?status=active&limit=50'); this.navBadge(); this.ticker(); } catch(e){}
   },
-
   async loadOee(){
     try {
       State.oee = await api('/oee/summary/plant');
@@ -917,19 +874,16 @@ const App = {
       document.getElementById('tkOee').textContent = avg.toFixed(1)+'%';
     } catch(e){}
   },
-
   ticker(){
     document.getElementById('tkAlarms').textContent = State.alarms.length;
     const r = State.machines.filter(m=>State.live[m.id]?.status==='running').length;
     document.getElementById('tkRunning').textContent = r;
   },
-
   navBadge(){
     const el = document.getElementById('navAlarmCount');
     if (State.alarms.length){ el.textContent = State.alarms.length; el.style.display='inline-block'; }
     else el.style.display='none';
   },
-
   realtime(){
     if (CONFIG.DEMO_MODE){ DemoAPI.startSimulator(); this.setLive(true); return; }
     if (State.socket) return;
@@ -947,14 +901,12 @@ const App = {
       State.socket.on('alarm', a=>this.onAlarm(a));
     } catch(e){}
   },
-
   setLive(ok){
     const el = document.getElementById('liveIndicator');
     if (!el) return;
     el.className = 'status-live ' + (ok ? 'on' : 'off');
     el.querySelector('span:last-child').textContent = ok ? 'Live' : 'Offline';
   },
-
   onTele(d){
     const card = document.querySelector(`.machine-card[data-id="${d.machineId}"]`);
     if (card){
@@ -963,12 +915,11 @@ const App = {
       if (led) led.className = 'led ' + s;
       const el = card.querySelector(`[data-m="${d.metric}"]`);
       if (el){
-        const dec = d.metric==='vibration' ? 2 : (['voltage','humidity','power_kwh'].includes(d.metric) ? 0 : 1);
+        const dec = d.metric==='vibration' ? 2 : (['voltage','humidity'].includes(d.metric) ? 0 : 1);
         const unit = el.querySelector('.unit');
         if (unit) el.innerHTML = fmtN(d.value, dec) + `<span class="unit">${unit.textContent}</span>`;
         else el.textContent = fmtN(d.value, dec);
       }
-      // phase boxes
       const ph = card.querySelector(`[data-ph="${d.metric}"]`);
       if (ph) ph.textContent = fmtN(d.value, d.metric.startsWith('voltage')?0:1);
     }
@@ -979,7 +930,6 @@ const App = {
     }
     if (window.DetailPage && DetailPage.machineId === d.machineId) DetailPage.onTele(d);
   },
-
   onAlarm(a){
     State.alarms.unshift({ ...a, machine_name: State.machines.find(m=>m.id===a.machine_id)?.name || a.machine_id });
     State.alarms = State.alarms.slice(0,50);
@@ -988,13 +938,11 @@ const App = {
     if (State.currentRoute === 'dashboard') DashboardPage.render();
     if (a.severity === 'critical') beep();
   },
-
   route(){
     const raw = (location.hash.replace('#','') || 'dashboard').split('/');
     const route = raw[0]; const param = raw[1];
     const v = document.getElementById('view');
     v.classList.remove('no-scroll');
-
     document.querySelectorAll('.nav-item').forEach(n=>{
       const nr = n.dataset.route, na = n.dataset.area;
       let active = false;
@@ -1002,10 +950,8 @@ const App = {
       else if (route !== 'area' && nr === route) active = true;
       n.classList.toggle('active', active);
     });
-
     const title = { dashboard:'Overview', alarms:'Alarm Center', reports:'Reports', settings:'Settings', admin:'Equipment', area:'Area', machine:'Machine Detail' }[route] || 'Overview';
     document.getElementById('pageTitle').textContent = title;
-
     if (route === 'area') { State.currentRoute = 'area'; AreaPage.render(param); }
     else if (route === 'machine') { State.currentRoute = 'machine'; DetailPage.render(param); }
     else if (route === 'alarms') { State.currentRoute = 'alarms'; AlarmsPage.render(); }
@@ -1017,7 +963,6 @@ const App = {
     }
     else { State.currentRoute = 'dashboard'; v.classList.add('no-scroll'); DashboardPage.render(); }
   },
-
   goMachine(id){ location.hash = `machine/${id}`; },
   goArea(a){ location.hash = `area/${a}`; }
 };
@@ -1049,7 +994,7 @@ const DashboardPage = {
           <div class="card" style="display:flex;flex-direction:column;overflow:hidden;">
             <div class="card-head" style="flex-shrink:0;">
               <div class="card-title">OEE · Equipment Ranking</div>
-              <div class="t-muted mono" style="font-size:10px;">Availability × Performance × Quality</div>
+              <div class="t-muted mono" style="font-size:10px;">Avail × Perf × Quality</div>
             </div>
             <div style="flex:1;position:relative;min-height:0;"><canvas id="oeeChart"></canvas></div>
           </div>
@@ -1065,11 +1010,8 @@ const DashboardPage = {
         </div>
       </div>
     `;
-    this.renderAreas();
-    this.renderAlarms();
-    this.renderOee();
+    this.renderAreas(); this.renderAlarms(); this.renderOee();
   },
-
   updateKpi(){
     const $ = id=>document.getElementById(id);
     if (!$('kRun')) return;
@@ -1077,32 +1019,23 @@ const DashboardPage = {
     const run = State.machines.filter(m=>State.live[m.id]?.status==='running').length;
     const idle = State.machines.filter(m=>State.live[m.id]?.status==='idle').length;
     const err = State.machines.filter(m=>State.live[m.id]?.status==='error').length;
-    $('kTotal').textContent = total;
-    $('kRun').textContent = run;
-    $('kIdle').textContent = idle;
-    $('kErr').textContent = err;
+    $('kTotal').textContent = total; $('kRun').textContent = run;
+    $('kIdle').textContent = idle; $('kErr').textContent = err;
   },
-
   renderAreas(){
-    const container = document.getElementById('areaCards');
-    if (!container) return;
-    container.innerHTML = '';
+    const c = document.getElementById('areaCards'); if (!c) return;
+    c.innerHTML = '';
     const colorMap = { Machining:'var(--brand)', Welding:'var(--idle)', Power:'var(--warn)', Facility:'var(--ok)' };
-
     Object.entries(AREA_MAP).forEach(([key, area])=>{
       const list = State.machines.filter(m => m.metadata?.area === key);
       const run = list.filter(m=>State.live[m.id]?.status==='running').length;
       const idle = list.filter(m=>State.live[m.id]?.status==='idle').length;
       const err = list.filter(m=>State.live[m.id]?.status==='error').length;
-
       const card = document.createElement('div');
       card.className = 'area-card';
       card.innerHTML = `
         <div class="accent-bar" style="background:${colorMap[key]};"></div>
-        <div class="head">
-          <div class="name">${area.title}</div>
-          <div class="count">${list.length} assets</div>
-        </div>
+        <div class="head"><div class="name">${area.title}</div><div class="count">${list.length} assets</div></div>
         <div class="stats">
           <div class="s"><span class="led running"></span> ${run}</div>
           <div class="s"><span class="led idle"></span> ${idle}</div>
@@ -1110,39 +1043,28 @@ const DashboardPage = {
         </div>
       `;
       card.onclick = ()=> App.goArea(key);
-      container.appendChild(card);
+      c.appendChild(card);
     });
   },
-
   renderAlarms(){
-    const el = document.getElementById('alarmList');
-    if (!el) return;
-    if (!State.alarms.length){
-      el.innerHTML = `<div class="empty"><div class="icon">✓</div>No active alarms</div>`;
-      return;
-    }
+    const el = document.getElementById('alarmList'); if (!el) return;
+    if (!State.alarms.length){ el.innerHTML = `<div class="empty"><div class="icon">✓</div>No active alarms</div>`; return; }
     el.innerHTML = State.alarms.map(a=>`
       <div class="alarm" data-sev="${a.severity}">
         <span class="sev">${a.severity}</span>
-        <div class="body">
-          <div class="t">${esc(a.machine_name||a.machine_id)}</div>
-          <div class="m">${esc(a.message)}</div>
-        </div>
+        <div class="body"><div class="t">${esc(a.machine_name||a.machine_id)}</div><div class="m">${esc(a.message)}</div></div>
         <div class="time">${ago(a.raised_at)}</div>
       </div>
     `).join('');
   },
-
   renderOee(){
-    const ctx = document.getElementById('oeeChart');
-    if (!ctx) return;
+    const ctx = document.getElementById('oeeChart'); if (!ctx) return;
     if (this.oeeChart) this.oeeChart.destroy();
     this.oeeChart = new Chart(ctx.getContext('2d'), {
       type:'bar',
       data:{
         labels: State.oee.map(r=>r.machine_id),
         datasets:[{
-          label:'OEE',
           data: State.oee.map(r=>+r.oee||0),
           backgroundColor: State.oee.map(r=> +r.oee>=85 ? '#4ade80' : +r.oee>=60 ? '#fbbf24' : '#f87171'),
           borderRadius:3
@@ -1169,7 +1091,6 @@ const AreaPage = {
     const c = document.getElementById('view');
     if (!area){ c.innerHTML = `<div class="page"><div class="card">Area tidak ditemukan</div></div>`; return; }
     const list = State.machines.filter(m => m.metadata?.area === areaKey);
-
     const run = list.filter(m=>State.live[m.id]?.status==='running').length;
     const idle = list.filter(m=>State.live[m.id]?.status==='idle').length;
     const err = list.filter(m=>['error','offline'].includes(State.live[m.id]?.status)).length;
@@ -1185,7 +1106,6 @@ const AreaPage = {
         <div id="sections"></div>
       </div>
     `;
-
     const container = document.getElementById('sections');
     area.sections.forEach(section=>{
       const items = list.filter(section.filter);
@@ -1203,10 +1123,8 @@ const AreaPage = {
       const grid = sec.querySelector('.machine-grid');
       items.forEach(m=>grid.appendChild(this.card(m)));
     });
-
-    if (!list.length) container.innerHTML = `<div class="card"><div class="empty">No equipment registered in this area</div></div>`;
+    if (!list.length) container.innerHTML = `<div class="card"><div class="empty">No equipment registered</div></div>`;
   },
-
   card(m){
     const live = State.live[m.id] || {};
     const status = live.status || 'offline';
@@ -1237,22 +1155,14 @@ const AreaPage = {
         </div>
         <div class="kwh-bar">
           <span class="l">Energy</span>
-          <span class="v mono" data-m="power_kwh">${fmtN(live.power_kwh,0)} <span class="unit" style="font-size:10px;color:var(--ink-3);">kWh</span></span>
+          <span class="v mono" data-m="power_kwh">${fmtN(live.power_kwh,1)} <span class="unit" style="font-size:10px;color:var(--ink-3);">kWh</span></span>
         </div>
       `;
     } else if (m.type === 'Environment'){
       body = `
         <div class="env-row">
-          <div class="env-box">
-            <div class="icon">🌡️</div>
-            <div class="l">Temp</div>
-            <div class="v mono" data-m="temp">${fmtN(live.temp,1)}<span style="font-size:10px;color:var(--ink-3);font-weight:400;">°C</span></div>
-          </div>
-          <div class="env-box">
-            <div class="icon">💧</div>
-            <div class="l">Humidity</div>
-            <div class="v mono" data-m="humidity">${fmtN(live.humidity,0)}<span style="font-size:10px;color:var(--ink-3);font-weight:400;">%</span></div>
-          </div>
+          <div class="env-box"><div class="icon">🌡️</div><div class="l">Suhu</div><div class="v mono" data-m="temp">${fmtN(live.temp,1)}<span style="font-size:10px;color:var(--ink-3);font-weight:400;">°C</span></div></div>
+          <div class="env-box"><div class="icon">💧</div><div class="l">Humidity</div><div class="v mono" data-m="humidity">${fmtN(live.humidity,0)}<span style="font-size:10px;color:var(--ink-3);font-weight:400;">%</span></div></div>
         </div>
       `;
     } else if (m.type === 'Welding'){
@@ -1274,23 +1184,16 @@ const AreaPage = {
         </div>
       `;
     }
-
     card.innerHTML = `
       <div class="top">
         <div style="min-width:0;">
-          <div class="name">
-            <span class="led ${status}"></span>
-            <span class="truncate">${esc(m.name)}</span>
-          </div>
+          <div class="name"><span class="led ${status}"></span><span class="truncate">${esc(m.name)}</span></div>
           <div class="loc">${esc(m.location||'-')}${meta.bay?' · '+meta.bay:''}${meta.station?' · '+meta.station:''}</div>
         </div>
         <span class="tag">${esc(m.id)}</span>
       </div>
       ${body}
-      <div class="foot">
-        <span>${esc(sub).toUpperCase()}</span>
-        <span>${live.lastSeen ? ago(live.lastSeen)+' ago' : 'never'}</span>
-      </div>
+      <div class="foot"><span>${esc(sub).toUpperCase()}</span><span>${live.lastSeen ? ago(live.lastSeen)+' ago' : 'never'}</span></div>
     `;
     card.onclick = ()=> App.goMachine(m.id);
     return card;
@@ -1298,13 +1201,29 @@ const AreaPage = {
 };
 
 /* ============================================================
-   DETAIL PAGE (RST + trending)
+   DETAIL PAGE
 ============================================================ */
 const DetailPage = {
   machineId: null,
   charts: {},
   phaseVolt: 'all',
   phaseCur: 'all',
+  range: '6h',  // default: 6 jam
+  rangeCustom: { from:null, to:null },
+
+  rangeToInterval(range){
+    // Return {from, to, interval} untuk backend
+    const now = new Date();
+    if (range === '1h')  return { from: new Date(now - 3600e3).toISOString(),  to: now.toISOString(), interval: '1 minute' };
+    if (range === '6h')  return { from: new Date(now - 6*3600e3).toISOString(), to: now.toISOString(), interval: '5 minutes' };
+    if (range === '24h') return { from: new Date(now - 24*3600e3).toISOString(), to: now.toISOString(), interval: '15 minutes' };
+    if (range === '7d')  return { from: new Date(now - 7*24*3600e3).toISOString(), to: now.toISOString(), interval: '1 hour' };
+    if (range === '30d') return { from: new Date(now - 30*24*3600e3).toISOString(), to: now.toISOString(), interval: '6 hours' };
+    if (range === 'custom' && this.rangeCustom.from && this.rangeCustom.to){
+      return { from: this.rangeCustom.from, to: this.rangeCustom.to, interval: '15 minutes' };
+    }
+    return { from: new Date(now - 6*3600e3).toISOString(), to: now.toISOString(), interval: '5 minutes' };
+  },
 
   render(id){
     if (!id) id = State.machines[0]?.id;
@@ -1320,87 +1239,103 @@ const DetailPage = {
     const status = live.status || 'offline';
     const c = document.getElementById('view');
 
+    // Chart setup
     let charts = '';
-    if (['Lathe','Milling','Drilling'].includes(m.type)){
-      charts = `
-        <div class="grid-3">
-          <div class="card"><div class="card-head"><div class="card-title">Temperature (°C)</div></div><div class="chart-box"><canvas id="ch1"></canvas></div></div>
-          <div class="card"><div class="card-head"><div class="card-title">RPM</div></div><div class="chart-box"><canvas id="ch2"></canvas></div></div>
-          <div class="card"><div class="card-head"><div class="card-title">Vibration (mm/s)</div></div><div class="chart-box"><canvas id="ch3"></canvas></div></div>
-        </div>
-      `;
-    } else if (m.type === 'Welding'){
-      charts = `
-        <div class="grid-2">
-          <div class="card"><div class="card-head"><div class="card-title">Voltage (V)</div></div><div class="chart-box"><canvas id="ch1"></canvas></div></div>
-          <div class="card"><div class="card-head"><div class="card-title">Current (A)</div></div><div class="chart-box"><canvas id="ch2"></canvas></div></div>
-        </div>
-      `;
-    } else if (m.type === 'Panel'){
-      // ⚡ FULL RST + TRENDING
+    if (m.type === 'Panel'){
       charts = `
         <div class="card">
           <div class="card-head">
             <div class="card-title">3-Phase Voltage (V)</div>
             <div class="phase-toggles">
-              <button class="phase-btn active" onclick="DetailPage.setVolt('all')">ALL</button>
-              <button class="phase-btn" data-p="R" onclick="DetailPage.setVolt('R')">R</button>
-              <button class="phase-btn" data-p="S" onclick="DetailPage.setVolt('S')">S</button>
-              <button class="phase-btn" data-p="T" onclick="DetailPage.setVolt('T')">T</button>
+              <button class="phase-btn active" data-phase-chart="V" data-phase="all">ALL</button>
+              <button class="phase-btn" data-phase-chart="V" data-phase="R">R</button>
+              <button class="phase-btn" data-phase-chart="V" data-phase="S">S</button>
+              <button class="phase-btn" data-phase-chart="V" data-phase="T">T</button>
             </div>
           </div>
           <div class="chart-box"><canvas id="chV"></canvas></div>
         </div>
-
         <div class="card">
           <div class="card-head">
             <div class="card-title">3-Phase Current (A)</div>
             <div class="phase-toggles">
-              <button class="phase-btn active" onclick="DetailPage.setCur('all')">ALL</button>
-              <button class="phase-btn" data-p="R" onclick="DetailPage.setCur('R')">R</button>
-              <button class="phase-btn" data-p="S" onclick="DetailPage.setCur('S')">S</button>
-              <button class="phase-btn" data-p="T" onclick="DetailPage.setCur('T')">T</button>
+              <button class="phase-btn active" data-phase-chart="I" data-phase="all">ALL</button>
+              <button class="phase-btn" data-phase-chart="I" data-phase="R">R</button>
+              <button class="phase-btn" data-phase-chart="I" data-phase="S">S</button>
+              <button class="phase-btn" data-phase-chart="I" data-phase="T">T</button>
             </div>
           </div>
           <div class="chart-box"><canvas id="chI"></canvas></div>
         </div>
-
         <div class="card">
           <div class="card-head">
             <div class="card-title">⚡ Energy Record (kWh)</div>
-            <span class="t-muted mono" style="font-size:10px;">kumulatif + Δ per 5 menit</span>
+            <span class="t-muted mono" style="font-size:10px;">kumulatif + Δ</span>
           </div>
           <div class="chart-box"><canvas id="chK"></canvas></div>
         </div>
       `;
-    } else if (m.type === 'Environment'){
-      charts = `
-        <div class="grid-2">
-          <div class="card"><div class="card-head"><div class="card-title">Temperature (°C)</div></div><div class="chart-box"><canvas id="ch1"></canvas></div></div>
-          <div class="card"><div class="card-head"><div class="card-title">Humidity (%)</div></div><div class="chart-box"><canvas id="ch2"></canvas></div></div>
-        </div>
-      `;
+    } else {
+      const metrics = METRICS_BY_TYPE[m.type] || [];
+      charts = `<div class="grid-${Math.min(metrics.length, 3)}">`;
+      metrics.forEach((mt, idx)=>{
+        charts += `
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">${mt.label}${mt.unit?' ('+mt.unit+')':''}</div>
+            </div>
+            <div class="chart-box"><canvas id="ch${idx}"></canvas></div>
+          </div>
+        `;
+      });
+      charts += `</div>`;
     }
 
     const showOee = m.type !== 'Panel';
 
     c.innerHTML = `
       <div class="page">
-        <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-          <div style="min-width:0;">
-            <div class="name" style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;">
-              <span class="led ${status}"></span>${esc(m.name)}
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;">
+                <span class="led ${status}"></span>${esc(m.name)}
+              </div>
+              <div class="mono t-muted" style="font-size:10px;margin-top:3px;">${esc(m.id)} · ${esc(m.location||'')}</div>
             </div>
-            <div class="mono t-muted" style="font-size:10px;margin-top:3px;">${esc(m.id)} · ${esc(m.location||'')}</div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <select id="picker" class="mono" style="padding:6px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);font-size:11px;">
-              ${State.machines.map(x=>`<option value="${x.id}" ${x.id===id?'selected':''}>${esc(x.id)} — ${esc(x.name)}</option>`).join('')}
-            </select>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <select id="picker" class="mono" style="padding:6px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);font-size:11px;">
+                ${State.machines.map(x=>`<option value="${x.id}" ${x.id===id?'selected':''}>${esc(x.id)} — ${esc(x.name)}</option>`).join('')}
+              </select>
+              <button class="btn btn-sm" onclick="DetailPage.exportCSV()">⬇ CSV</button>
+              <button class="btn btn-sm" onclick="DetailPage.exportPDF()">📄 PDF</button>
+            </div>
           </div>
         </div>
 
         <div class="grid-4 mobile-2col" id="kpiRow"></div>
+
+        <!-- Range selector -->
+        <div class="card">
+          <div class="card-head" style="margin-bottom:0;padding-bottom:0;border:none;">
+            <div class="card-title">Trending Period</div>
+            <div class="range-sel" id="rangeSel">
+              <button class="range-btn" data-range="1h">1 Hour</button>
+              <button class="range-btn active" data-range="6h">6 Hours</button>
+              <button class="range-btn" data-range="24h">24 Hours</button>
+              <button class="range-btn" data-range="7d">7 Days</button>
+              <button class="range-btn" data-range="30d">30 Days</button>
+              <button class="range-btn" data-range="custom">Custom</button>
+            </div>
+          </div>
+          <div id="customRange" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
+            <div class="grid-2">
+              <div class="field"><label>From</label><input type="datetime-local" id="cfFrom"></div>
+              <div class="field"><label>To</label><input type="datetime-local" id="cfTo"></div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="DetailPage.applyCustomRange()">Apply Custom Range</button>
+          </div>
+        </div>
 
         ${charts}
 
@@ -1420,25 +1355,46 @@ const DetailPage = {
 
     document.getElementById('picker').addEventListener('change', e => location.hash = `machine/${e.target.value}`);
 
+    // Range selector listeners
+    document.querySelectorAll('.range-btn').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        document.querySelectorAll('.range-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        this.range = b.dataset.range;
+        document.getElementById('customRange').style.display = this.range === 'custom' ? 'block' : 'none';
+        if (this.range !== 'custom') this.reloadCharts();
+      });
+    });
+
+    // Phase toggle listeners
+    document.querySelectorAll('.phase-btn').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const chart = b.dataset.phaseChart;
+        const phase = b.dataset.phase;
+        if (chart === 'V') this.phaseVolt = phase;
+        if (chart === 'I') this.phaseCur = phase;
+        document.querySelectorAll(`.phase-btn[data-phase-chart="${chart}"]`).forEach(x=>{
+          x.classList.toggle('active', x.dataset.phase === phase);
+        });
+        this.reloadCharts();
+      });
+    });
+
     this.renderKpi();
-
-    if (['Lathe','Milling','Drilling'].includes(m.type)){
-      this.loadChart('temp','ch1','#f87171');
-      this.loadChart('rpm','ch2','#4ea8de');
-      this.loadChart('vibration','ch3','#a78bfa');
-    } else if (m.type === 'Welding'){
-      this.loadChart('voltage','ch1','#fb923c');
-      this.loadChart('current','ch2','#fbbf24');
-    } else if (m.type === 'Panel'){
-      this.loadRST();
-      this.loadKwh();
-    } else if (m.type === 'Environment'){
-      this.loadChart('temp','ch1','#f87171');
-      this.loadChart('humidity','ch2','#06b6d4');
-    }
-
+    this.reloadCharts();
     if (showOee) this.loadOee();
     this.loadAlarms();
+  },
+
+  reloadCharts(){
+    const m = State.machines.find(x=>x.id===this.machineId) || {};
+    if (m.type === 'Panel'){
+      this.loadRST();
+      this.loadKwh();
+    } else {
+      const metrics = METRICS_BY_TYPE[m.type] || [];
+      metrics.forEach((mt, idx)=> this.loadChart(mt, `ch${idx}`));
+    }
   },
 
   renderKpi(){
@@ -1449,10 +1405,8 @@ const DetailPage = {
     if (['Lathe','Milling','Drilling'].includes(m.type)){ pLabel='RPM'; pVal = fmtN(live.rpm,0); }
     else if (m.type === 'Welding'){ pLabel='Current'; pVal = fmtN(live.current,0)+' A'; }
     else if (m.type === 'Panel'){ pLabel='Voltage R'; pVal = fmtN(live.voltage_r,0)+' V'; }
-    else if (m.type === 'Environment'){ pLabel='Temp'; pVal = fmtN(live.temp,1)+' °C'; }
-
-    const el = document.getElementById('kpiRow');
-    if (!el) return;
+    else if (m.type === 'Environment'){ pLabel='Suhu'; pVal = fmtN(live.temp,1)+' °C'; }
+    const el = document.getElementById('kpiRow'); if (!el) return;
     el.innerHTML = `
       <div class="card"><div class="kpi-label">Status</div>
         <div class="kpi-value sm" style="display:flex;align-items:center;gap:8px;">
@@ -1468,17 +1422,17 @@ const DetailPage = {
     `;
   },
 
-  async loadChart(metric, id, color){
+  async loadChart(metric, id){
     try {
-      const rows = await api(`/telemetry/${this.machineId}?metric=${metric}&interval=5 minutes&limit=200`);
-      const el = document.getElementById(id);
-      if (!el) return;
+      const r = this.rangeToInterval(this.range);
+      const rows = await api(`/telemetry/${this.machineId}?metric=${metric.key}&interval=${encodeURIComponent(r.interval)}&from=${encodeURIComponent(r.from)}&to=${encodeURIComponent(r.to)}&limit=500`);
+      const el = document.getElementById(id); if (!el) return;
       if (this.charts[id]) this.charts[id].destroy();
       this.charts[id] = new Chart(el.getContext('2d'), {
         type:'line',
-        data:{ labels: rows.map(r=>fmtT(r.bucket)), datasets:[{
-          data: rows.map(r=>+r.avg_value),
-          borderColor: color, backgroundColor: color+'18',
+        data:{ labels: rows.map(x=>fmtT(x.bucket)), datasets:[{
+          data: rows.map(x=>+x.avg_value),
+          borderColor: metric.color, backgroundColor: metric.color+'18',
           borderWidth: 1.5, tension:.35, fill:true, pointRadius:0, pointHoverRadius:4
         }]},
         options:{
@@ -1493,64 +1447,35 @@ const DetailPage = {
     } catch(e){ console.error(e); }
   },
 
-  /* ============ PANEL RST TRENDING ============ */
-  setVolt(phase){
-    this.phaseVolt = phase;
-    document.querySelectorAll('.phase-btn[data-p]').forEach(b=>{
-      const parent = b.closest('.card');
-      const isVoltCard = parent?.querySelector('.card-title')?.textContent.includes('Voltage');
-      if (isVoltCard) b.classList.toggle('active', b.dataset.p === phase);
-      else if (phase === 'all' && !isVoltCard) { /* ignore */ }
-    });
-    // fix: hanya toggle tombol di card voltage
-    const voltCard = document.querySelectorAll('.card')[1];
-    this.loadRST();
-  },
-
-  setCur(phase){
-    this.phaseCur = phase;
-    document.querySelectorAll('.phase-btn[data-p]').forEach(b=>{
-      const parent = b.closest('.card');
-      const isCurCard = parent?.querySelector('.card-title')?.textContent.includes('Current');
-      if (isCurCard) b.classList.toggle('active', b.dataset.p === phase);
-    });
-    this.loadRST();
-  },
-
   async loadRST(){
-    const grid = Theme.grid(), text = Theme.text();
     try {
+      const r = this.rangeToInterval(this.range);
+      const q = (metric) => `/telemetry/${this.machineId}?metric=${metric}&interval=${encodeURIComponent(r.interval)}&from=${encodeURIComponent(r.from)}&to=${encodeURIComponent(r.to)}&limit=500`;
       const [vR, vS, vT, iR, iS, iT] = await Promise.all([
-        api(`/telemetry/${this.machineId}?metric=voltage_r&interval=5 minutes&limit=200`),
-        api(`/telemetry/${this.machineId}?metric=voltage_s&interval=5 minutes&limit=200`),
-        api(`/telemetry/${this.machineId}?metric=voltage_t&interval=5 minutes&limit=200`),
-        api(`/telemetry/${this.machineId}?metric=current_r&interval=5 minutes&limit=200`),
-        api(`/telemetry/${this.machineId}?metric=current_s&interval=5 minutes&limit=200`),
-        api(`/telemetry/${this.machineId}?metric=current_t&interval=5 minutes&limit=200`)
+        api(q('voltage_r')), api(q('voltage_s')), api(q('voltage_t')),
+        api(q('current_r')), api(q('current_s')), api(q('current_t'))
       ]);
+
+      const grid = Theme.grid(), text = Theme.text();
 
       // Voltage
       const vEl = document.getElementById('chV');
       if (vEl){
         if (this.charts.v) this.charts.v.destroy();
         const ds = [];
-        if (this.phaseVolt==='all' || this.phaseVolt==='R') ds.push({ label:'R (V)', data: vR.map(r=>+r.avg_value), borderColor:'#ef4444', backgroundColor:'#ef444415', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
-        if (this.phaseVolt==='all' || this.phaseVolt==='S') ds.push({ label:'S (V)', data: vS.map(r=>+r.avg_value), borderColor:'#eab308', backgroundColor:'#eab30815', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
-        if (this.phaseVolt==='all' || this.phaseVolt==='T') ds.push({ label:'T (V)', data: vT.map(r=>+r.avg_value), borderColor:'#06b6d4', backgroundColor:'#06b6d415', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
-
+        if (this.phaseVolt==='all' || this.phaseVolt==='R') ds.push({ label:'R (V)', data: vR.map(x=>+x.avg_value), borderColor:'#ef4444', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+        if (this.phaseVolt==='all' || this.phaseVolt==='S') ds.push({ label:'S (V)', data: vS.map(x=>+x.avg_value), borderColor:'#eab308', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+        if (this.phaseVolt==='all' || this.phaseVolt==='T') ds.push({ label:'T (V)', data: vT.map(x=>+x.avg_value), borderColor:'#06b6d4', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
         this.charts.v = new Chart(vEl.getContext('2d'), {
           type:'line',
-          data:{ labels: vR.map(r=>fmtT(r.bucket)), datasets: ds },
+          data:{ labels: vR.map(x=>fmtT(x.bucket)), datasets: ds },
           options:{
             responsive:true, maintainAspectRatio:false,
             interaction:{mode:'index',intersect:false},
-            plugins:{
-              legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } },
-              tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 }
-            },
+            plugins:{ legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } }, tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 } },
             scales:{
               x:{ grid:{color:grid}, ticks:{color:text,font:{size:9},maxTicksLimit:6} },
-              y:{ grid:{color:grid}, ticks:{color:text,font:{size:9}, callback:v=>v} }
+              y:{ grid:{color:grid}, ticks:{color:text,font:{size:9}} }
             }
           }
         });
@@ -1561,23 +1486,19 @@ const DetailPage = {
       if (iEl){
         if (this.charts.i) this.charts.i.destroy();
         const ds = [];
-        if (this.phaseCur==='all' || this.phaseCur==='R') ds.push({ label:'R (A)', data: iR.map(r=>+r.avg_value), borderColor:'#ef4444', backgroundColor:'#ef444415', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
-        if (this.phaseCur==='all' || this.phaseCur==='S') ds.push({ label:'S (A)', data: iS.map(r=>+r.avg_value), borderColor:'#eab308', backgroundColor:'#eab30815', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
-        if (this.phaseCur==='all' || this.phaseCur==='T') ds.push({ label:'T (A)', data: iT.map(r=>+r.avg_value), borderColor:'#06b6d4', backgroundColor:'#06b6d415', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
-
+        if (this.phaseCur==='all' || this.phaseCur==='R') ds.push({ label:'R (A)', data: iR.map(x=>+x.avg_value), borderColor:'#ef4444', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+        if (this.phaseCur==='all' || this.phaseCur==='S') ds.push({ label:'S (A)', data: iS.map(x=>+x.avg_value), borderColor:'#eab308', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
+        if (this.phaseCur==='all' || this.phaseCur==='T') ds.push({ label:'T (A)', data: iT.map(x=>+x.avg_value), borderColor:'#06b6d4', borderWidth:1.5, tension:.3, fill:false, pointRadius:0, pointHoverRadius:4 });
         this.charts.i = new Chart(iEl.getContext('2d'), {
           type:'line',
-          data:{ labels: iR.map(r=>fmtT(r.bucket)), datasets: ds },
+          data:{ labels: iR.map(x=>fmtT(x.bucket)), datasets: ds },
           options:{
             responsive:true, maintainAspectRatio:false,
             interaction:{mode:'index',intersect:false},
-            plugins:{
-              legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } },
-              tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 }
-            },
+            plugins:{ legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } }, tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 } },
             scales:{
               x:{ grid:{color:grid}, ticks:{color:text,font:{size:9},maxTicksLimit:6} },
-              y:{ grid:{color:grid}, ticks:{color:text,font:{size:9}, callback:v=>v} }
+              y:{ grid:{color:grid}, ticks:{color:text,font:{size:9}} }
             }
           }
         });
@@ -1587,30 +1508,26 @@ const DetailPage = {
 
   async loadKwh(){
     try {
-      const rows = await api(`/telemetry/${this.machineId}?metric=power_kwh&interval=5 minutes&limit=200`);
-      const el = document.getElementById('chK');
-      if (!el) return;
+      const r = this.rangeToInterval(this.range);
+      const rows = await api(`/telemetry/${this.machineId}?metric=power_kwh&interval=${encodeURIComponent(r.interval)}&from=${encodeURIComponent(r.from)}&to=${encodeURIComponent(r.to)}&limit=500`);
+      const el = document.getElementById('chK'); if (!el) return;
       if (this.charts.k) this.charts.k.destroy();
       const grid = Theme.grid(), text = Theme.text();
-      const vals = rows.map(r=>+r.avg_value);
+      const vals = rows.map(x=>+x.avg_value);
       const deltas = vals.map((v,i)=> i===0 ? 0 : Math.max(0, v - vals[i-1]));
-
       this.charts.k = new Chart(el.getContext('2d'), {
         type:'line',
         data:{
-          labels: rows.map(r=>fmtT(r.bucket)),
+          labels: rows.map(x=>fmtT(x.bucket)),
           datasets:[
             { label:'kWh (kumulatif)', data: vals, borderColor:'#fbbf24', backgroundColor:'#fbbf2415', borderWidth:1.5, tension:.3, fill:true, pointRadius:0, yAxisID:'y' },
-            { label:'Δ kWh / 5min', data: deltas, borderColor:'#06b6d4', borderWidth:1.2, borderDash:[4,3], tension:.3, fill:false, pointRadius:0, yAxisID:'y1' }
+            { label:'Δ kWh', data: deltas, borderColor:'#06b6d4', borderWidth:1.2, borderDash:[4,3], tension:.3, fill:false, pointRadius:0, yAxisID:'y1' }
           ]
         },
         options:{
           responsive:true, maintainAspectRatio:false,
           interaction:{mode:'index',intersect:false},
-          plugins:{
-            legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } },
-            tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 }
-          },
+          plugins:{ legend:{ labels:{ color:text, font:{size:10}, boxWidth:10 } }, tooltip:{ backgroundColor:'#131820', borderColor:'#232c38', borderWidth:1 } },
           scales:{
             x:{ grid:{color:grid}, ticks:{color:text,font:{size:9},maxTicksLimit:6} },
             y:{ position:'left', grid:{color:grid}, ticks:{color:'#fbbf24',font:{size:9}} },
@@ -1624,8 +1541,7 @@ const DetailPage = {
   async loadOee(){
     try {
       const rows = await api(`/oee/${this.machineId}?from=NOW() - INTERVAL '7 days'`);
-      const el = document.getElementById('chOee');
-      if (!el) return;
+      const el = document.getElementById('chOee'); if (!el) return;
       if (this.charts.oee) this.charts.oee.destroy();
       const grid = Theme.grid(), text = Theme.text();
       this.charts.oee = new Chart(el.getContext('2d'), {
@@ -1655,19 +1571,12 @@ const DetailPage = {
     try {
       const rows = await api('/alarms?status=active&limit=100');
       const mine = rows.filter(r=>r.machine_id === this.machineId);
-      const el = document.getElementById('alarmHist');
-      if (!el) return;
-      if (!mine.length){
-        el.innerHTML = `<div class="empty">No active alarms</div>`;
-        return;
-      }
+      const el = document.getElementById('alarmHist'); if (!el) return;
+      if (!mine.length){ el.innerHTML = `<div class="empty">No active alarms</div>`; return; }
       el.innerHTML = mine.map(a=>`
         <div class="alarm" data-sev="${a.severity}">
           <span class="sev">${a.severity}</span>
-          <div class="body">
-            <div class="t">${esc(a.message)}</div>
-            <div class="m mono">value: ${a.value ?? '—'}</div>
-          </div>
+          <div class="body"><div class="t">${esc(a.message)}</div><div class="m mono">value: ${a.value ?? '—'}</div></div>
           <div class="time">${ago(a.raised_at)}</div>
           ${Auth.canOperate() ? `<button class="btn btn-sm" onclick="DetailPage.ack(${a.id})">ACK</button>` : ''}
         </div>
@@ -1679,49 +1588,245 @@ const DetailPage = {
     try { await api(`/alarms/${id}/ack`,{method:'POST'}); this.loadAlarms(); App.loadAlarms(); } catch(e){ alert(e.message); }
   },
 
+  applyCustomRange(){
+    const f = document.getElementById('cfFrom').value;
+    const t = document.getElementById('cfTo').value;
+    if (!f || !t){ alert('Isi From dan To'); return; }
+    this.rangeCustom.from = new Date(f).toISOString();
+    this.rangeCustom.to = new Date(t).toISOString();
+    this.reloadCharts();
+  },
+
   onTele(d){
     this.renderKpi();
-    // Realtime update chart RST
-    if (['voltage_r','voltage_s','voltage_t'].includes(d.metric) && this.charts.v){
-      const ch = this.charts.v;
-      const ph = d.metric.split('_')[1].toUpperCase();
-      const idx = ch.data.datasets.findIndex(x => x.label.startsWith(ph));
-      if (idx >= 0){
-        ch.data.datasets[idx].data.push(d.value);
-        if (ch.data.labels.length < ch.data.datasets[idx].data.length) ch.data.labels.push(fmtT(new Date()));
-        if (ch.data.labels.length > 200){
-          ch.data.labels.shift();
-          ch.data.datasets.forEach(ds => ds.data.shift());
+    // realtime chart update (hanya kalau range kecil dan phase chart ada)
+    const m = State.machines.find(x=>x.id===this.machineId) || {};
+    if (m.type === 'Panel'){
+      if (['voltage_r','voltage_s','voltage_t'].includes(d.metric) && this.charts.v){
+        const ch = this.charts.v;
+        const ph = d.metric.split('_')[1].toUpperCase();
+        const idx = ch.data.datasets.findIndex(x => x.label.startsWith(ph));
+        if (idx >= 0){
+          ch.data.datasets[idx].data.push(d.value);
+          if (ch.data.labels.length < ch.data.datasets[idx].data.length) ch.data.labels.push(fmtT(new Date()));
+          if (ch.data.labels.length > 500){ ch.data.labels.shift(); ch.data.datasets.forEach(ds => ds.data.shift()); }
+          ch.update('none');
         }
+      }
+      if (['current_r','current_s','current_t'].includes(d.metric) && this.charts.i){
+        const ch = this.charts.i;
+        const ph = d.metric.split('_')[1].toUpperCase();
+        const idx = ch.data.datasets.findIndex(x => x.label.startsWith(ph));
+        if (idx >= 0){
+          ch.data.datasets[idx].data.push(d.value);
+          if (ch.data.labels.length < ch.data.datasets[idx].data.length) ch.data.labels.push(fmtT(new Date()));
+          if (ch.data.labels.length > 500){ ch.data.labels.shift(); ch.data.datasets.forEach(ds => ds.data.shift()); }
+          ch.update('none');
+        }
+      }
+      if (d.metric === 'power_kwh' && this.charts.k){
+        const ch = this.charts.k;
+        const last = ch.data.datasets[0].data[ch.data.datasets[0].data.length-1] || 0;
+        ch.data.labels.push(fmtT(new Date()));
+        ch.data.datasets[0].data.push(d.value);
+        ch.data.datasets[1].data.push(Math.max(0, d.value - last));
+        if (ch.data.labels.length > 500){ ch.data.labels.shift(); ch.data.datasets.forEach(ds => ds.data.shift()); }
         ch.update('none');
       }
     }
-    if (['current_r','current_s','current_t'].includes(d.metric) && this.charts.i){
-      const ch = this.charts.i;
-      const ph = d.metric.split('_')[1].toUpperCase();
-      const idx = ch.data.datasets.findIndex(x => x.label.startsWith(ph));
-      if (idx >= 0){
-        ch.data.datasets[idx].data.push(d.value);
-        if (ch.data.labels.length < ch.data.datasets[idx].data.length) ch.data.labels.push(fmtT(new Date()));
-        if (ch.data.labels.length > 200){
-          ch.data.labels.shift();
-          ch.data.datasets.forEach(ds => ds.data.shift());
-        }
-        ch.update('none');
-      }
+  },
+
+  /* ============================================================
+     EXPORT CSV - PER EQUIPMENT
+  ============================================================ */
+  async exportCSV(){
+    const m = State.machines.find(x=>x.id===this.machineId);
+    if (!m) return;
+    const live = State.live[m.id] || {};
+    const r = this.rangeToInterval(this.range);
+    const metrics = METRICS_BY_TYPE[m.type] || [];
+
+    // Fetch all metric data
+    const dataMap = {};
+    for (const mt of metrics){
+      try {
+        dataMap[mt.key] = await api(`/telemetry/${m.id}?metric=${mt.key}&interval=${encodeURIComponent(r.interval)}&from=${encodeURIComponent(r.from)}&to=${encodeURIComponent(r.to)}&limit=2000`);
+      } catch { dataMap[mt.key] = []; }
     }
-    if (d.metric === 'power_kwh' && this.charts.k){
-      const ch = this.charts.k;
-      const last = ch.data.datasets[0].data[ch.data.datasets[0].data.length-1] || 0;
-      ch.data.labels.push(fmtT(new Date()));
-      ch.data.datasets[0].data.push(d.value);
-      ch.data.datasets[1].data.push(Math.max(0, d.value - last));
-      if (ch.data.labels.length > 200){
-        ch.data.labels.shift();
-        ch.data.datasets.forEach(ds => ds.data.shift());
-      }
-      ch.update('none');
+
+    const rows = [];
+    // Header info
+    rows.push(['EVE WORKSHOP - EQUIPMENT TELEMETRY REPORT']);
+    rows.push(['Generated', fmtDExcel(new Date())]);
+    rows.push(['Equipment', m.name]);
+    rows.push(['Asset Tag', m.id]);
+    rows.push(['Type', m.type]);
+    rows.push(['Area', m.metadata?.area || '']);
+    rows.push(['Location', m.location || '']);
+    rows.push(['Current Status', live.status || 'offline']);
+    rows.push(['Report Period', `${this.range.toUpperCase()} (${fmtDExcel(r.from)} — ${fmtDExcel(r.to)})`]);
+    rows.push([]);
+
+    // Current snapshot
+    rows.push(['CURRENT SNAPSHOT']);
+    rows.push(['Metric','Value','Unit']);
+    metrics.forEach(mt=>{
+      const v = live[mt.key];
+      rows.push([mt.label, v !== undefined ? Number(v).toFixed(mt.decimals) : '—', mt.unit || '']);
+    });
+    rows.push([]);
+
+    // Time series — merge by bucket
+    rows.push(['TIME SERIES DATA']);
+    const header = ['Timestamp', ...metrics.map(mt => `${mt.label} (${mt.unit||'-'})`)];
+    rows.push(header);
+
+    // Build union of timestamps
+    const tsSet = new Set();
+    Object.values(dataMap).forEach(arr => arr.forEach(x => tsSet.add(x.bucket)));
+    const timestamps = [...tsSet].sort();
+
+    timestamps.forEach(ts=>{
+      const row = [fmtDExcel(ts)];
+      metrics.forEach(mt=>{
+        const entry = dataMap[mt.key]?.find(x => x.bucket === ts);
+        row.push(entry ? Number(entry.avg_value).toFixed(mt.decimals) : '');
+      });
+      rows.push(row);
+    });
+
+    downloadCSV(rows, `EVE-${m.id}-Telemetry-${new Date().toISOString().slice(0,10)}.csv`);
+  },
+
+  /* ============================================================
+     EXPORT PDF - PER EQUIPMENT
+  ============================================================ */
+  async exportPDF(){
+    const m = State.machines.find(x=>x.id===this.machineId);
+    if (!m) return;
+    const live = State.live[m.id] || {};
+    const r = this.rangeToInterval(this.range);
+    const metrics = METRICS_BY_TYPE[m.type] || [];
+
+    // Fetch data
+    const dataMap = {};
+    for (const mt of metrics){
+      try {
+        dataMap[mt.key] = await api(`/telemetry/${m.id}?metric=${mt.key}&interval=${encodeURIComponent(r.interval)}&from=${encodeURIComponent(r.from)}&to=${encodeURIComponent(r.to)}&limit=2000`);
+      } catch { dataMap[mt.key] = []; }
     }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    let y = addPDFHeader(doc, 'Equipment Report', 'Enterprise-based Vocational Education');
+
+    // Equipment info
+    doc.setFontSize(13);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text(m.name, 14, y + 5);
+    y += 10;
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(90, 90, 90);
+    doc.text(`Asset Tag: ${m.id}`, 14, y);
+    doc.text(`Type: ${m.type}`, 14, y + 5);
+    doc.text(`Area: ${m.metadata?.area || '—'}`, 14, y + 10);
+    doc.text(`Location: ${m.location || '—'}`, 14, y + 15);
+    doc.text(`Current Status: ${(live.status || 'offline').toUpperCase()}`, 100, y);
+    doc.text(`Report Period: ${this.range.toUpperCase()}`, 100, y + 5);
+    doc.text(`From: ${fmtDExcel(r.from)}`, 100, y + 10);
+    doc.text(`To: ${fmtDExcel(r.to)}`, 100, y + 15);
+    y += 22;
+
+    // Current snapshot table
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text('CURRENT SNAPSHOT', 14, y);
+    y += 4;
+
+    const snapshotBody = metrics.map(mt => {
+      const v = live[mt.key];
+      return [mt.label, v !== undefined ? Number(v).toFixed(mt.decimals) : '—', mt.unit || '—'];
+    });
+
+    doc.autoTable({
+      startY: y,
+      head: [['Metric', 'Value', 'Unit']],
+      body: snapshotBody,
+      theme: 'grid',
+      headStyles: { fillColor: [78, 168, 222], textColor: 255, fontSize: 9, fontStyle: 'bold' },
+      styles: { fontSize: 9, cellPadding: 2.5 },
+      columnStyles: { 0: { fontStyle: 'bold' }, 1: { halign: 'right', fontStyle: 'bold' } },
+      margin: { left: 14, right: 14 }
+    });
+
+    y = doc.lastAutoTable.finalY + 10;
+
+    // Time series - statistik
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('STATISTICS', 14, y);
+    y += 4;
+
+    const stats = metrics.map(mt => {
+      const data = dataMap[mt.key]?.map(x => +x.avg_value) || [];
+      if (!data.length) return [mt.label, '—', '—', '—', '—'];
+      const min = Math.min(...data), max = Math.max(...data);
+      const avg = data.reduce((a,b)=>a+b,0) / data.length;
+      return [mt.label, min.toFixed(mt.decimals), avg.toFixed(mt.decimals), max.toFixed(mt.decimals), mt.unit || '—'];
+    });
+
+    doc.autoTable({
+      startY: y,
+      head: [['Metric', 'Min', 'Avg', 'Max', 'Unit']],
+      body: stats,
+      theme: 'grid',
+      headStyles: { fillColor: [78, 168, 222], textColor: 255, fontSize: 9, fontStyle: 'bold' },
+      styles: { fontSize: 9, cellPadding: 2.5, halign: 'right' },
+      columnStyles: { 0: { halign: 'left', fontStyle: 'bold' } },
+      margin: { left: 14, right: 14 }
+    });
+
+    y = doc.lastAutoTable.finalY + 10;
+
+    // Data table (max 60 row terakhir supaya tidak kepanjangan)
+    if (y > 220){ doc.addPage(); y = addPDFHeader(doc, 'Equipment Report (cont.)', 'Enterprise-based Vocational Education'); }
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text('RECENT DATA (max 60 rows)', 14, y);
+    y += 4;
+
+    const tsSet = new Set();
+    Object.values(dataMap).forEach(arr => arr.forEach(x => tsSet.add(x.bucket)));
+    const timestamps = [...tsSet].sort().slice(-60);
+
+    const tableHead = ['Timestamp', ...metrics.map(mt => mt.label)];
+    const tableBody = timestamps.map(ts=>[
+      fmtDExcel(ts),
+      ...metrics.map(mt => {
+        const entry = dataMap[mt.key]?.find(x => x.bucket === ts);
+        return entry ? Number(entry.avg_value).toFixed(mt.decimals) : '';
+      })
+    ]);
+
+    doc.autoTable({
+      startY: y,
+      head: [tableHead],
+      body: tableBody,
+      theme: 'striped',
+      headStyles: { fillColor: [78, 168, 222], textColor: 255, fontSize: 7.5, fontStyle: 'bold' },
+      styles: { fontSize: 7.5, cellPadding: 1.5, halign: 'right' },
+      columnStyles: { 0: { halign: 'left' } },
+      margin: { left: 14, right: 14 }
+    });
+
+    addPDFFooter(doc);
+    doc.save(`EVE-${m.id}-Report-${new Date().toISOString().slice(0,10)}.pdf`);
   }
 };
 
@@ -1745,9 +1850,7 @@ const AlarmsPage = {
           </div>
           <div class="table-wrap">
             <table class="data">
-              <thead><tr>
-                <th>Time</th><th>Severity</th><th>Machine</th><th>Message</th><th>Value</th><th>Status</th><th></th>
-              </tr></thead>
+              <thead><tr><th>Time</th><th>Severity</th><th>Machine</th><th>Message</th><th>Value</th><th>Status</th><th></th></tr></thead>
               <tbody id="rows"></tbody>
             </table>
           </div>
@@ -1761,8 +1864,7 @@ const AlarmsPage = {
   async load(){
     try {
       const rows = await api(`/alarms?status=${this.filter}&limit=200`);
-      const tb = document.getElementById('rows');
-      if (!tb) return;
+      const tb = document.getElementById('rows'); if (!tb) return;
       if (!rows.length){ tb.innerHTML = `<tr><td colspan="7"><div class="empty">No alarms</div></td></tr>`; return; }
       tb.innerHTML = rows.map(a=>`
         <tr>
@@ -1772,9 +1874,7 @@ const AlarmsPage = {
           <td>${esc(a.message)}</td>
           <td class="mono">${a.value ?? '—'}</td>
           <td class="t-muted" style="font-size:10px;">${a.status}</td>
-          <td style="text-align:right;">
-            ${a.status==='active' && Auth.canOperate() ? `<button class="btn btn-sm" onclick="AlarmsPage.ack(${a.id})">ACK</button>` : ''}
-          </td>
+          <td style="text-align:right;">${a.status==='active' && Auth.canOperate() ? `<button class="btn btn-sm" onclick="AlarmsPage.ack(${a.id})">ACK</button>` : ''}</td>
         </tr>
       `).join('');
     } catch(e){}
@@ -1785,7 +1885,7 @@ const AlarmsPage = {
 };
 
 /* ============================================================
-   REPORTS
+   REPORTS (Plant-wide)
 ============================================================ */
 const ReportsPage = {
   render(){
@@ -1794,11 +1894,11 @@ const ReportsPage = {
     c.innerHTML = `
       <div class="page">
         <div class="card">
-          <div class="card-head"><div class="card-title">Shift Report</div></div>
+          <div class="card-head"><div class="card-title">Shift Report · Plant Wide</div></div>
           <div class="grid-3">
-            <div class="field"><label>Date</label><input type="date" id="rpDate" value="${today}" style="padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);"></div>
+            <div class="field"><label>Date</label><input type="date" id="rpDate" value="${today}"></div>
             <div class="field"><label>Shift</label>
-              <select id="rpShift" style="padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+              <select id="rpShift">
                 <option value="all">All (24h)</option>
                 <option value="1">Shift 1 (08-16)</option>
                 <option value="2">Shift 2 (16-24)</option>
@@ -1806,7 +1906,7 @@ const ReportsPage = {
               </select>
             </div>
             <div class="field"><label>Area</label>
-              <select id="rpArea" style="padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+              <select id="rpArea">
                 <option value="all">All Areas</option>
                 <option value="Machining">Machining</option>
                 <option value="Welding">Welding</option>
@@ -1822,7 +1922,6 @@ const ReportsPage = {
             <button class="btn" onclick="ReportsPage.csvOee()">📈 OEE CSV</button>
           </div>
         </div>
-
         <div class="card">
           <div class="card-head"><div class="card-title">Preview</div><span class="mono t-muted" style="font-size:10px;" id="rpSum"></span></div>
           <div class="table-wrap">
@@ -1836,12 +1935,10 @@ const ReportsPage = {
     `;
     this.refresh();
   },
-
   filtered(){
     const a = document.getElementById('rpArea')?.value || 'all';
     return a === 'all' ? State.machines : State.machines.filter(m => m.metadata?.area === a);
   },
-
   refresh(){
     const list = this.filtered();
     const tb = document.getElementById('rpRows');
@@ -1867,7 +1964,6 @@ const ReportsPage = {
       </tr>`;
     }).join('');
   },
-
   csv(){
     const list = this.filtered();
     const date = document.getElementById('rpDate')?.value || new Date().toISOString().slice(0,10);
@@ -1875,8 +1971,11 @@ const ReportsPage = {
     const area = document.getElementById('rpArea')?.value || 'all';
     const rows = [
       ['EVE WORKSHOP - SHIFT REPORT'],
-      ['Generated', new Date().toLocaleString('id-ID')],
-      ['Date', date], ['Shift', shift], ['Area', area], [],
+      ['Generated', fmtDExcel(new Date())],
+      ['Date', date],
+      ['Shift', shift],
+      ['Area', area],
+      [],
       ['Tag','Equipment','Type','Area','Location','Status','Primary Metric','Last Seen']
     ];
     list.forEach(m=>{
@@ -1887,28 +1986,24 @@ const ReportsPage = {
       else if (m.type === 'Welding') p = fmtN(live.current,0)+' A';
       else if (m.type === 'Panel') p = `${fmtN(live.voltage_r,0)}V / ${fmtN(live.current_r,1)}A`;
       else if (m.type === 'Environment') p = `${fmtN(live.temp,1)}C / ${fmtN(live.humidity,0)}%`;
-      rows.push([m.id, m.name, m.type, m.metadata?.area||'', m.location||'', s, p, live.lastSeen ? fmtD(live.lastSeen) : '']);
+      rows.push([m.id, m.name, m.type, m.metadata?.area||'', m.location||'', s, p, live.lastSeen ? fmtDExcel(live.lastSeen) : '']);
     });
-    const csv = rows.map(r=>r.map(v=>{ const s = String(v??''); return s.includes(',')||s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s; }).join(',')).join('\n');
-    dl('\ufeff'+csv, `EVE-Shift-${date}.csv`, 'text/csv;charset=utf-8');
+    downloadCSV(rows, `EVE-Shift-${date}.csv`);
   },
-
   pdf(){
     const list = this.filtered();
     const date = document.getElementById('rpDate')?.value || new Date().toISOString().slice(0,10);
     const shift = document.getElementById('rpShift')?.value || 'all';
     const area = document.getElementById('rpArea')?.value || 'all';
-    const shiftLabel = { all:'All (24h)', '1':'Shift 1 (08-16)', '2':'Shift 2 (16-24)', '3':'Shift 3 (00-08)' }[shift];
-
+    const shiftLabel = { all:'All (24h)', '1':'Shift 1', '2':'Shift 2', '3':'Shift 3' }[shift];
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+    let y = addPDFHeader(doc, 'Shift Report', 'Enterprise-based Vocational Education');
 
-    doc.setFontSize(14); doc.setFont(undefined,'bold');
-    doc.text('EVE WORKSHOP', 14, 15);
-    doc.setFontSize(9); doc.setFont(undefined,'normal');
-    doc.text('Shift Report', 14, 20);
-    doc.text(`Date: ${date}  |  Shift: ${shiftLabel}  |  Area: ${area}`, 200, 15);
-    doc.text(`Generated: ${new Date().toLocaleString('id-ID')}`, 200, 20);
+    doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 30, 30);
+    doc.text(`Shift Report - ${date}`, 14, y + 3); y += 8;
+    doc.setFontSize(9); doc.setFont(undefined, 'normal'); doc.setTextColor(90, 90, 90);
+    doc.text(`Shift: ${shiftLabel}    Area: ${area}    Total Equipment: ${list.length}`, 14, y);
 
     const body = list.map(m=>{
       const live = State.live[m.id] || {};
@@ -1922,28 +2017,39 @@ const ReportsPage = {
     });
 
     doc.autoTable({
-      startY: 26,
-      head: [['Tag','Equipment','Type','Area','Status','Primary']],
+      startY: y + 4,
+      head: [['Tag','Equipment','Type','Area','Status','Primary Metric']],
       body, theme:'grid',
-      headStyles:{ fillColor:[78,168,222], textColor:255, fontSize:9 },
-      styles:{ fontSize:8, cellPadding:2.5 }
+      headStyles: { fillColor:[78, 168, 222], textColor:255, fontSize:9, fontStyle:'bold' },
+      styles: { fontSize:8, cellPadding:2.5 }
     });
 
+    addPDFFooter(doc);
     doc.save(`EVE-Shift-${date}.pdf`);
   },
-
   csvAlarms(){
-    const rows = [['EVE WORKSHOP - ALARMS'], ['Generated', new Date().toLocaleString('id-ID')], [], ['Time','Severity','Machine ID','Machine','Message','Value','Status']];
-    State.alarms.forEach(a=>rows.push([fmtD(a.raised_at), a.severity, a.machine_id, a.machine_name||'', a.message, a.value??'', a.status]));
-    const csv = rows.map(r=>r.map(v=>{ const s = String(v??''); return s.includes(',') ? `"${s}"` : s; }).join(',')).join('\n');
-    dl('\ufeff'+csv, `EVE-Alarms-${new Date().toISOString().slice(0,10)}.csv`, 'text/csv;charset=utf-8');
+    const rows = [
+      ['EVE WORKSHOP - ALARM LOG'],
+      ['Generated', fmtDExcel(new Date())],
+      [],
+      ['Time','Severity','Machine ID','Machine','Message','Value','Status']
+    ];
+    State.alarms.forEach(a=>{
+      rows.push([fmtDExcel(a.raised_at), a.severity, a.machine_id, a.machine_name||'', a.message, a.value??'', a.status]);
+    });
+    downloadCSV(rows, `EVE-Alarms-${new Date().toISOString().slice(0,10)}.csv`);
   },
-
   csvOee(){
-    const rows = [['EVE WORKSHOP - OEE'], ['Generated', new Date().toLocaleString('id-ID')], [], ['Machine','OEE %','Availability','Performance','Quality']];
-    State.oee.forEach(r=>rows.push([r.machine_id, (+r.oee).toFixed(2), (+r.availability).toFixed(2), (+r.performance).toFixed(2), (+r.quality).toFixed(2)]));
-    const csv = rows.map(r=>r.join(',')).join('\n');
-    dl('\ufeff'+csv, `EVE-OEE-${new Date().toISOString().slice(0,10)}.csv`, 'text/csv;charset=utf-8');
+    const rows = [
+      ['EVE WORKSHOP - OEE SUMMARY'],
+      ['Generated', fmtDExcel(new Date())],
+      [],
+      ['Machine','OEE %','Availability %','Performance %','Quality %']
+    ];
+    State.oee.forEach(r=>{
+      rows.push([r.machine_id, (+r.oee).toFixed(2), (+r.availability).toFixed(2), (+r.performance).toFixed(2), (+r.quality).toFixed(2)]);
+    });
+    downloadCSV(rows, `EVE-OEE-${new Date().toISOString().slice(0,10)}.csv`);
   }
 };
 
@@ -1966,13 +2072,11 @@ const SettingsPage = {
             <div class="field"><label>Mode</label><input value="${CONFIG.DEMO_MODE?'DEMO':'LIVE'}" disabled></div>
           </div>
         </div>
-
         <div class="card">
           <div class="card-head"><div class="card-title">Appearance</div></div>
           <div class="grid-2">
-            <div class="field">
-              <label>Theme</label>
-              <select id="setTheme" style="padding:8px 10px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+            <div class="field"><label>Theme</label>
+              <select id="setTheme">
                 <option value="dark" ${cur==='dark'?'selected':''}>Dark</option>
                 <option value="light" ${cur==='light'?'selected':''}>Light</option>
               </select>
@@ -1980,12 +2084,8 @@ const SettingsPage = {
             <div style="display:flex;align-items:flex-end;"><button class="btn btn-primary" onclick="SettingsPage.applyTheme()">Apply</button></div>
           </div>
         </div>
-
         <div class="card">
-          <div class="card-head">
-            <div class="card-title">Alarm Thresholds</div>
-            <span class="t-muted mono" style="font-size:10px;">${Auth.isAdmin()?'editable':'read-only'}</span>
-          </div>
+          <div class="card-head"><div class="card-title">Alarm Thresholds</div><span class="t-muted mono" style="font-size:10px;">${Auth.isAdmin()?'editable':'read-only'}</span></div>
           <div class="grid-3">
             <div class="field"><label>Temp Warning (°C)</label><input type="number" id="s1" value="${s.tempWarning}" ${!Auth.isAdmin()?'disabled':''}></div>
             <div class="field"><label>Temp Critical (°C)</label><input type="number" id="s2" value="${s.tempCritical}" ${!Auth.isAdmin()?'disabled':''}></div>
@@ -1999,14 +2099,13 @@ const SettingsPage = {
               <button class="btn btn-primary" onclick="SettingsPage.save()">Save</button>
               <button class="btn btn-danger" onclick="SettingsPage.reset()">Reset</button>
             </div>
-          ` : `<p class="t-muted" style="font-size:11px;margin-top:8px;">Only admin can edit thresholds.</p>`}
+          ` : `<p class="t-muted" style="font-size:11px;margin-top:8px;">Only admin can edit.</p>`}
           <p id="saveMsg" style="font-size:11px;margin-top:8px;min-height:14px;"></p>
         </div>
-
         <div class="card">
           <div class="card-head"><div class="card-title">System</div></div>
           <div style="font-size:12px;line-height:1.9;">
-            <div><span class="t-muted">Version:</span> <span class="mono">v1.0</span></div>
+            <div><span class="t-muted">Version:</span> <span class="mono">v2.0</span></div>
             <div><span class="t-muted">API:</span> <span class="mono" style="font-size:10px;">${esc(CONFIG.API_BASE)}</span></div>
             <div><span class="t-muted">Socket:</span> <span class="mono" style="font-size:10px;">${esc(CONFIG.SOCKET_URL)}</span></div>
             <div><span class="t-muted">Assets:</span> <strong>${State.machines.length}</strong></div>
@@ -2016,7 +2115,6 @@ const SettingsPage = {
       </div>
     `;
   },
-
   applyTheme(){
     const v = document.getElementById('setTheme').value;
     document.documentElement.setAttribute('data-theme', v);
@@ -2024,7 +2122,6 @@ const SettingsPage = {
     Theme.updateIcon();
     SettingsPage.render();
   },
-
   save(){
     const s = {
       tempWarning: +document.getElementById('s1').value,
@@ -2041,11 +2138,9 @@ const SettingsPage = {
     m.style.color = 'var(--ok)'; m.textContent = 'Saved';
     setTimeout(()=>m.textContent = '', 2500);
   },
-
   reset(){
     if (!confirm('Reset settings?')) return;
-    Settings.reset();
-    this.render();
+    Settings.reset(); this.render();
   }
 };
 
@@ -2067,7 +2162,6 @@ const AdminPage = {
           <div class="card"><div class="kpi-label">Welding</div><div class="kpi-value" style="color:var(--idle);">${State.machines.filter(m=>m.metadata?.area==='Welding').length}</div></div>
           <div class="card"><div class="kpi-label">Power + Facility</div><div class="kpi-value t-warn">${State.machines.filter(m=>['Power','Facility'].includes(m.metadata?.area)).length}</div></div>
         </div>
-
         <div class="card">
           <div class="card-head">
             <div class="card-title">Equipment Registry</div>
@@ -2084,14 +2178,9 @@ const AdminPage = {
     `;
     this.renderTable();
   },
-
   renderTable(){
-    const tb = document.getElementById('eqRows');
-    if (!tb) return;
-    if (!State.machines.length){
-      tb.innerHTML = `<tr><td colspan="6"><div class="empty">No equipment yet</div></td></tr>`;
-      return;
-    }
+    const tb = document.getElementById('eqRows'); if (!tb) return;
+    if (!State.machines.length){ tb.innerHTML = `<tr><td colspan="6"><div class="empty">No equipment yet</div></td></tr>`; return; }
     tb.innerHTML = State.machines.map(m=>{
       const s = State.live[m.id]?.status || 'offline';
       return `<tr>
@@ -2107,20 +2196,16 @@ const AdminPage = {
       </tr>`;
     }).join('');
   },
-
   openAdd(){
     document.getElementById('modalRoot').innerHTML = `
       <div class="modal-back" onclick="if(event.target===this)AdminPage.close()">
         <div class="modal">
-          <div class="modal-head">
-            <h3>Add Equipment</h3>
-            <button class="btn btn-sm" onclick="AdminPage.close()">✕</button>
-          </div>
+          <div class="modal-head"><h3>Add Equipment</h3><button class="btn btn-sm" onclick="AdminPage.close()">✕</button></div>
           <div class="modal-body">
             <div class="field"><label>Asset Tag *</label><input class="mono" id="aTag" placeholder="MW-LT04"></div>
             <div class="field"><label>Name *</label><input id="aName" placeholder="Lathe Machine #04"></div>
             <div class="field"><label>Type *</label>
-              <select id="aType" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+              <select id="aType">
                 <option value="Lathe">Lathe Machine</option>
                 <option value="Milling">Milling Machine</option>
                 <option value="Drilling">Drilling Machine</option>
@@ -2130,7 +2215,7 @@ const AdminPage = {
               </select>
             </div>
             <div class="field"><label>Area *</label>
-              <select id="aArea" style="width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--line);border-radius:4px;color:var(--ink);">
+              <select id="aArea">
                 <option value="Machining">Machining</option>
                 <option value="Welding">Welding</option>
                 <option value="Power">Power</option>
@@ -2149,9 +2234,7 @@ const AdminPage = {
       </div>
     `;
   },
-
   close(){ document.getElementById('modalRoot').innerHTML = ''; },
-
   async submitAdd(){
     const err = document.getElementById('aErr');
     const tag = document.getElementById('aTag').value.trim();
@@ -2173,12 +2256,10 @@ const AdminPage = {
         await api('/machines', { method:'POST', body: JSON.stringify(machine) });
         State.machines.push(machine);
       }
-      this.close();
-      this.render();
+      this.close(); this.render();
       document.getElementById('tkAssets').textContent = State.machines.length;
     } catch (e){ err.textContent = '⚠ ' + e.message; }
   },
-
   confirmDel(id){
     const m = State.machines.find(x=>x.id === id);
     if (!m) return;
@@ -2187,9 +2268,7 @@ const AdminPage = {
         <div class="modal" style="max-width:380px;">
           <div class="modal-head"><h3>Delete Equipment</h3><button class="btn btn-sm" onclick="AdminPage.close()">✕</button></div>
           <div class="modal-body">
-            <p style="font-size:12px;line-height:1.6;">
-              Delete <strong>${esc(m.name)}</strong> (<span class="mono">${esc(m.id)}</span>)?
-            </p>
+            <p style="font-size:12px;line-height:1.6;">Delete <strong>${esc(m.name)}</strong> (<span class="mono">${esc(m.id)}</span>)?</p>
             <p class="t-muted" style="font-size:11px;margin-top:8px;">This cannot be undone.</p>
           </div>
           <div class="modal-foot">
@@ -2200,7 +2279,6 @@ const AdminPage = {
       </div>
     `;
   },
-
   async doDel(id){
     try {
       if (CONFIG.DEMO_MODE){
@@ -2212,8 +2290,7 @@ const AdminPage = {
         State.machines = State.machines.filter(m=>m.id !== id);
         delete State.live[id];
       }
-      this.close();
-      this.render();
+      this.close(); this.render();
       document.getElementById('tkAssets').textContent = State.machines.length;
     } catch(e){ alert(e.message); }
   }
@@ -2264,7 +2341,6 @@ const DemoAPI = {
     }
     return b;
   },
-
   init(){
     if (Object.keys(this.state).length) return;
     this.machines.forEach(m => this.state[m.id] = this.createInitialState(m));
@@ -2273,7 +2349,6 @@ const DemoAPI = {
       { id:this.alarmId++, machine_id:'PW-PN00', severity:'critical', message:'Phase R voltage low', value:198, status:'active', raised_at:new Date(Date.now()-90000).toISOString(), machine_name:'Main Distribution Panel' }
     ];
   },
-
   addMachine(m){ if (this.machines.find(x=>x.id === m.id)) throw new Error('Tag exists'); this.machines.push(m); this.state[m.id] = this.createInitialState(m); },
   removeMachine(id){ this.machines = this.machines.filter(m => m.id !== id); delete this.state[id]; },
 
@@ -2305,10 +2380,15 @@ const DemoAPI = {
       });
       return out;
     }
+
     if (path.startsWith('/telemetry/') && path.includes('?')){
       const mid = path.match(/\/telemetry\/([^?]+)/)[1];
-      const metric = new URLSearchParams('?'+path.split('?')[1]).get('metric') || 'temp';
-      return this.getHistory(mid, metric);
+      const params = new URLSearchParams('?'+path.split('?')[1]);
+      const metric = params.get('metric') || 'temp';
+      const from = params.get('from');
+      const to = params.get('to');
+      const limit = parseInt(params.get('limit') || '200');
+      return this.getHistory(mid, metric, from, to, limit);
     }
     if (path.startsWith('/alarms?')){
       const st = new URLSearchParams('?'+path.split('?')[1]).get('status') || 'active';
@@ -2344,10 +2424,18 @@ const DemoAPI = {
     throw new Error('Demo: unknown path ' + path);
   },
 
-  getHistory(machineId, metric){
-    const key = `${machineId}:${metric}`;
+  getHistory(machineId, metric, fromStr, toStr, limit){
+    // Generate on-the-fly based on range
+    const to = toStr ? new Date(toStr) : new Date();
+    const from = fromStr ? new Date(fromStr) : new Date(to.getTime() - 6*3600e3);
+    const span = to - from;
+    const key = `${machineId}:${metric}:${from.getTime()}:${to.getTime()}:${limit}`;
     if (this.historyCache[key]) return this.historyCache[key];
+
     const pts = [];
+    // Determine step based on span
+    const stepMs = span / Math.min(limit, 200);
+
     let base = 45, noise = 15;
     if (metric === 'rpm'){ base = 1500; noise = 600; }
     else if (metric === 'vibration'){ base = 2.5; noise = 2; }
@@ -2362,11 +2450,13 @@ const DemoAPI = {
     else if (metric === 'humidity'){ base = 60; noise = 15; }
     else if (metric === 'power_kwh'){ base = 1300; noise = 30; }
 
-    for (let i=199; i>=0; i--){
+    const N = Math.min(200, Math.max(50, Math.floor(span / stepMs)));
+    for (let i = N-1; i >= 0; i--){
+      const ts = new Date(to.getTime() - i * stepMs);
       let v;
-      if (metric === 'power_kwh') v = base + (199-i)*0.4 + (Math.random()-0.5)*noise*0.3;
+      if (metric === 'power_kwh') v = base + (N-1-i)*0.4 + (Math.random()-0.5)*noise*0.3;
       else v = base + (Math.random()-0.5)*noise;
-      pts.push({ bucket: new Date(Date.now()-i*5*60000).toISOString(), avg_value: v });
+      pts.push({ bucket: ts.toISOString(), avg_value: v });
     }
     this.historyCache[key] = pts;
     return pts;
@@ -2377,11 +2467,9 @@ const DemoAPI = {
     this.simulated = true;
     setInterval(()=>{
       this.machines.forEach(m=>{
-        const s = this.state[m.id];
-        if (!s) return;
+        const s = this.state[m.id]; if (!s) return;
         s.lastSeen = new Date().toISOString();
         const th = this.thresholds || Settings.get();
-
         switch(m.type){
           case 'Lathe': case 'Milling': case 'Drilling':
             s.rpm = Math.max(0, Math.min(3500, s.rpm + (Math.random()-0.5)*80));
@@ -2401,7 +2489,6 @@ const DemoAPI = {
               this.alarms.unshift(a); App.onAlarm(a);
             }
             break;
-
           case 'Welding':
             s.voltage = Math.max(15, Math.min(30, s.voltage + (Math.random()-0.5)*0.6));
             s.current = Math.max(50, Math.min(180, s.current + (Math.random()-0.5)*6));
@@ -2410,7 +2497,6 @@ const DemoAPI = {
             App.onTele({ machineId:m.id, metric:'current', value:s.current });
             App.onTele({ machineId:m.id, metric:'arc_status', textValue:s.arc_status });
             break;
-
           case 'Panel':
             s.voltage_r = Math.max(200, Math.min(235, s.voltage_r + (Math.random()-0.5)*1.2));
             s.voltage_s = Math.max(200, Math.min(235, s.voltage_s + (Math.random()-0.5)*1.2));
@@ -2422,7 +2508,6 @@ const DemoAPI = {
             ['voltage_r','voltage_s','voltage_t','current_r','current_s','current_t','power_kwh']
               .forEach(k => App.onTele({ machineId:m.id, metric:k, value:s[k] }));
             break;
-
           case 'Environment':
             s.temp = Math.max(20, Math.min(35, s.temp + (Math.random()-0.5)*0.25));
             s.humidity = Math.max(40, Math.min(85, s.humidity + (Math.random()-0.5)*0.6));
